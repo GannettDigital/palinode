@@ -3,7 +3,6 @@ NodeJS callback-based flow control utility library
 
 ## Installation
 ```Shell
-npm set registry http://presto-sinopia.awsdev.usatoday.com
 npm install palinode
 ```
 ## Test 
