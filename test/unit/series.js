@@ -7,12 +7,16 @@ describe('series', function() {
 
     var functionSeries = [];
     var series = require('../../lib/series.js').series;
-    var initialA = 2;
-    var initialB = 0;
-    var numTimesToAdd = 10;
-    var numToAddEachTime = 5;
+    var initialA;
+    var initialB;
+    var numTimesToAdd;
+    var numToAddEachTime;
 
     before('set up input', function() {
+        initialA = 2;
+        initialB = 0;
+        numTimesToAdd = 10;
+        numToAddEachTime = 5;
         functionSeries.push(add.bind(null, initialA, initialB));
         for (var i = 0; i < 10; ++i) {
             functionSeries.push(add);
