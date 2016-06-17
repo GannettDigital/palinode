@@ -32,6 +32,8 @@ function(error, param1[, param2, param3...]) {}
 ```
 Example usage
 ```
+var series = require('palinode').series;
+
 var numToAddEachTime = 5;
 function add(a, b, callback) {
     if (a < 0) {
