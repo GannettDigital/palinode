@@ -3,30 +3,29 @@
   "version": "0.0.1",
   "description": "node callback-based flow control utility library",
   "main": "index.js",
-  "scripts": {
-    "test": "npm run lint -- -x && npm run unit-test ",
-    "unit-test": "./node_modules/.bin/mocha --recursive test/unit",
-    "lint": "./node_modules/.bin/jscs ./lib/ ./test/unit",
-    "coverage": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- --recursive test/unit -R spec",
-    "unit-test-tc": "./node_modules/.bin/mocha --reporter mocha-teamcity-reporter test/unit --recursive",
-    "cover-tc": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report html -- --recursive test/unit"
-  },
   "repository": {
     "type": "git",
-    "url": "git+https://jhaugh42@github.com/GannettDigital/palinode.git"
+    "url": "https://github.com/GannettDigital/palinode.git"
   },
   "author": "Gannett Digital Content Solutions",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/GannettDigital/palinode/issues"
   },
   "homepage": "https://github.com/GannettDigital/palinode#readme",
   "devDependencies": {
     "chai": "3.5.0",
+    "coveralls": "2.11.9",
     "istanbul": "0.4.3",
     "jscs": "3.0.4",
     "mocha": "2.4.5 ",
     "mocha-teamcity-reporter": "1.0.0",
     "sinon": "1.17.4"
+  },
+  "scripts": {
+    "test": "npm run lint -- -x && mocha --recursive test/unit",
+    "lint": "./node_modules/.bin/jscs ./lib/ ./test",
+    "cover": "node ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec test/unit --recursive",
+    "coveralls": "npm run cover && ./node_modules/coveralls/bin/coveralls.js < coverage/lcov.info"
   }
 }
