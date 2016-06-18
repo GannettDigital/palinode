@@ -1,5 +1,6 @@
 # palinode
 NodeJS callback-based flow control utility library
+
 [![Build Status](https://travis-ci.org/GannettDigital/palinode.svg?branch=master)](https://travis-ci.org/GannettDigital/palinode)  [![Coverage Status](https://coveralls.io/repos/github/GannettDigital/palinode/badge.svg?branch=master)](https://coveralls.io/github/GannettDigital/palinode?branch=master)
 ## Installation
 ```Shell
