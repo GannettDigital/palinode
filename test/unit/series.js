@@ -9,7 +9,7 @@ describe('series', function() {
     var function1;
     var function2;
     var inputFunctions;
-    
+
     before(function() {
         Series = require('../../lib/series.js');
     });
@@ -139,7 +139,7 @@ describe('series', function() {
 
         it('should call process.nextTick with the function created by binding parameters to the second function', function() {
             var seriesCallback = function recursive_seriesCallback() {};
-            var fakeNext = function next(){};
+            var fakeNext = function next() {};
             seriesCallbackBindStub.returns(seriesCallback);
             applyBindStub.returns(fakeNext);
 
@@ -151,7 +151,7 @@ describe('series', function() {
 
         it('should call process.nextTick once', function() {
             var seriesCallback = function recursive_seriesCallback() {};
-            var fakeNext = function next(){};
+            var fakeNext = function next() {};
             seriesCallbackBindStub.returns(seriesCallback);
             applyBindStub.returns(fakeNext);
 
