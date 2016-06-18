@@ -58,6 +58,10 @@ describe('series', function() {
         });
     });
 
+    describe('series - callback wrapper', function() {
+
+    });
+
     describe('series - practical test', function() {
         var functionSeries = [];
         var initialA;
