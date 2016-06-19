@@ -4,18 +4,18 @@ NodeJS callback-based flow control utility library.  Palinode focuses on a pure,
 [![Build Status](https://travis-ci.org/GannettDigital/palinode.svg?branch=master)](https://travis-ci.org/GannettDigital/palinode)  [![Coverage Status](https://coveralls.io/repos/github/GannettDigital/palinode/badge.svg?branch=master)](https://coveralls.io/github/GannettDigital/palinode?branch=master)
 
 palinode (noun): a poem in which the poet retracts a view or sentiment expressed in a former poem. - source: Google. 
+
 ## Installation
 ```Shell
 npm install palinode
 ```
-## Test 
 
+## Test 
 ```Shell
 npm run test
 ```
 
 ## Coverage
-
 ```Shell
 npm run cover-html
 ```
@@ -25,24 +25,28 @@ npm run cover-html
 var theFunctionToUse = require(`palinode`).theFunctionYouWant
 ```
 
+## Callback Pattern Expectations
+As with the vast majority of native node libraries, all callbacks are by convention expected to be in the form:
+```Javascript
+function(error [, param1, param2, param3...]) {}
+```
+- A callback invoked with a falsy value in the 0th parameter position indicates that caller was successful.
+- A callback invoked with a truthy value in the 0th parameter position indicates the error encountered by the caller.
+- As a best practice, errors provided as the 0th parameter should be an instance of the `Error` prototype.
+- Parameters in the 1st-nth positions contain successful response information, if any. 
+
 ## Supported methods
 
 ### Series
 Runs a series of functions.  Each function calls back to the next. Any parameters passed to a callback are spread into the subsequent function call. 
 The provided array of functions is not mutated.
-All functions in a series should accept a callback in the form:
-```Javascript
-function(error, param1[, param2, param3...]) {}
-```
-Example usage
+
+#### Example usage
 ```Javascript
 var series = require('palinode').series;
 
 var numToAddEachTime = 5;
 function add(a, b, callback) {
-    if (a < 0) {
-        callback(new Error('a cannot be less than zero'));
-    }
     callback(null, a + b, numToAddEachTime);
 }
 
@@ -58,10 +62,12 @@ series(functions, function(error, result) {
     //outputs: 15
 }
 ```
+
 ### Map Each
-Runs a single function against each member of an array, invoking a callback when complete of if an error occurs during execution.  If successful for each item in the input array, the result provided to the callback will be a new array containing the mapped values.
+Runs a single function against each member of an array, invoking a callback when complete or when an error occurs during execution.  If successful for each item in the input array, the result provided to the callback will be a new array containing the mapped values. If an error occurs, no data will be returned in the callback result.
 The input array is not mutated.
-Example usage
+
+#### Example usage
 ```Javascript
 var mapEach = require('palinode').mapEach;
 var inputArray = [1,2,3,4,5,6,7,8,9,10];
