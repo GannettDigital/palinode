@@ -10,7 +10,7 @@ describe('series - practical test', function() {
     var numTimesToAdd;
     var numToAddEachTime;
 
-    before('set up input', function () {
+    before('set up input', function() {
         Series = require('../../lib/series.js');
         initialA = 2;
         initialB = 0;
@@ -23,8 +23,8 @@ describe('series - practical test', function() {
         }
     });
 
-    it('should execute all the functions provided and call the callback', function (done) {
-        Series.series(functionSeries, function (error, result) {
+    it('should execute all the functions provided and call the callback', function(done) {
+        Series.series(functionSeries, function(error, result) {
             expect(result).to.equal(numToAddEachTime * numTimesToAdd + (initialA + initialB));
             done();
         });

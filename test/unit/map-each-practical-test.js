@@ -5,7 +5,7 @@ var expect = require('chai').expect;
 describe('map-each - practical test', function() {
     var MapEach;
 
-    before(function () {
+    before(function() {
         MapEach = require('../../lib/map-each.js');
     });
 
