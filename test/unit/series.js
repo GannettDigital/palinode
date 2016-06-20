@@ -27,14 +27,13 @@ describe('series', function() {
     describe('series - entry point', function() {
         var seriesCallbackStub;
         var seriesCallbackBindStub;
-        var seriesCallbackBindResult = {whatever: 'was the bind result'};
-        var function0BindResult = {whatever: 'was the bind result function0'};
+        var seriesCallbackBindResult = function seriesCallbackBindResult() {};
+        var function0BindResult = function function0BindResult() {};
         var function0BindStub;
         var function1BindStub;
 
         before(function() {
             seriesCallbackStub = sinon.stub(Series, '_seriesCallback');
-            seriesCallbackStub.bind = seriesCallbackBindStub = sinon.stub();
         });
 
         beforeEach(function() {

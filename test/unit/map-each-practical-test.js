@@ -29,7 +29,7 @@ describe('map-each - practical test', function() {
     });
 
     it('should execute the provided callback for each element in the input array', function() {
-            expect(result).to.eql([1,4,9,16,25,36,49,64,81,100]);
+        expect(result).to.eql([1,4,9,16,25,36,49,64,81,100]);
     });
 
     it('should call the iteratee once for each member of the input array', function() {

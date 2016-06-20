@@ -12,19 +12,19 @@ describe('map-each - unit tests', function() {
     var iterateeBindStub;
     var iterateeBindStubResult = function iterateeBindResult() {};;
 
-    before(function () {
+    before(function() {
         MapEach = require('../../lib/map-each.js');
         nextTickStub = sinon.stub(process, 'nextTick');
         iteratee = sinon.spy();
         iterateeBindStub = sinon.stub(iteratee, 'bind').returns(iterateeBindStubResult);
     });
 
-    beforeEach(function () {
+    beforeEach(function() {
         nextTickStub.reset();
         iterateeBindStub.reset();
     });
 
-    after(function () {
+    after(function() {
         process.nextTick.restore();
     });
 
@@ -69,7 +69,7 @@ describe('map-each - unit tests', function() {
 
         it('should invoke process.nextTick once', function() {
             expect(nextTickStub.callCount).to.equal(1);
-        })
+        });
     });
 
     describe('map-each - callback', function() {
