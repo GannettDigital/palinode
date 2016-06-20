@@ -1,17 +1,18 @@
 language: node_js
 node_js:
-- "6"
-- "6.1"
-- "5.11"
-- "0.12"
+- '6'
+- '6.1'
+- '5.11'
+- '0.12'
 before_script:
 - npm run lint
 after_script:
 - npm run coveralls
 deploy:
   provider: npm
-  email: npm-publisher@dhutia.net
+  email: jhaugh42@gmail.com
   api_key:
-    secure: QhLKTSljbQz5hLn0+v73ASr5LRMiJnsa4WKOrKXesF2oRjIU81hKBnSaLk5npphSUgGHdys8ZwRfwAh27A+Iz21T4KBG9MkHm5Sa8/DPuqk68UilBpofckVqnz5weMteE/0vqcsexqzPnT098ygWxE3ZiypNN9qPQxTZV2ugU279eQThpnjvWrgDZzoSqusLVggjgelhHYPPCHelvvxHwuOmcrceajCuMiscZ0Dfi1CyU7cPeJKs6rWwyL50B/y+QjXLHtlrbS/TzRHGMmMsOQgNCGQVF/4SsiaWgZUduERZWtcngJgLsI2Tzn2gNI/n6l7Ql+5A0iufy+stYgOAiW8Anrj9PjYgXnH7WChqmsCZKMYKlOddsm9EXyh3Gr7d8gJrfKJ8kqi5v5ge8dKYlAIwJAP2O+3pYo+IKxEdDnIoE3QV0F1t2pZjRcJeI4ta76umPQgqJ0ud3BOlgqS6exSnaadkTL88gg3QF5VBXSP82WtFb3W0ZAcpJ0FjD00z4euMqKciuCp++6Vr/rc83yCxOgH3orQRoQm4n6/M8ePso7vEC8LBcgyDVzAchPnf2AD52Lm3UHg5+zZlSy4LJ6cexdZ5xm4LL3wyKM0cEGXtKyyMMJ8s6MMt9q0H2wK0QPLk8BkUvMNlBLdfHlRoED1t7ilwxK2+H0Xa5bCOlAY=
+    secure: WAzZrugCODo04yfxcWKGEcqomsph9NAgQBs3doBJoc6uJlNSXMBg6MaFzuuI8kiXhGmawimxGMvEgahZIQFg01imIdh83Rwr3Fg/o1RuHD1sXW03YwQs/MhyPb40qzrNzSX/dJED1eMdKDyyTBO47gI72vPHQWv8moANuI12lzocrZZYGr6sK84agc5CPkiJuNOZcPp7eWYhpS6XTBdKZ1Z7JFeb6fR4WeJ5CWE72ia5wt/F4NxySlzyCJObwD4xHXC4HCfnWW2ympLmu7oddVc/IKrmDHtvyx8JtgBIq5qte+oHXzk9ow+CfG7p+QI5RBhJu5micJewcBGAj0bvG6WiIsYRFIN+zan3tDp96Xiy5xIvy8BV5nnNMaE9WrtJHKgXkDtlvg1qIJAESb5huvAIfZTRjj0V9CvoIVljBoxEzp8vBPU+WxFS72/YlRm7oG/dzE4csogA9jIO9ohU/xZ1WgX3EWjLzozln9N+Cu1URQK1HTE6o2a7OmjbYjmwRtajMiHYQCkJ/arhYI8RgQEeNrgAcFCqnKSSWMfMkRmHLqgkzDzYr/7rIyp7AsVqG6bpPGfq4FVsnL97Km/lNB7WfGWX40YL8cmSML5BaGX65OKVoDo+oMDiI9J6RfhmOhTB7/0Dl7dqX5XPE5lCbVi6gnGmvlknNwvZLVAdqPk=
   on:
     tags: true
+    repo: GannettDigital/palinode
