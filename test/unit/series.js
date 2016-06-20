@@ -34,6 +34,7 @@ describe('series', function() {
 
         before(function() {
             seriesCallbackStub = sinon.stub(Series, '_seriesCallback');
+            seriesCallbackStub.bind = seriesCallbackBindStub = sinon.stub();
         });
 
         beforeEach(function() {
@@ -61,7 +62,7 @@ describe('series', function() {
             expect(function1BindStub.callCount).to.equal(0);
         });
 
-        it('should bind the provided callback, funciton array and 1 to Series._seriesCallback', function() {
+        it('should bind the provided callback, function array and 1 to Series._seriesCallback', function() {
             var callbackSpy = sinon.spy();
             Series.series(inputFunctions, callbackSpy);
             expect(seriesCallbackBindStub.args[0]).to.eql([
