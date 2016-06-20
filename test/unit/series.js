@@ -34,7 +34,6 @@ describe('series', function() {
 
         before(function() {
             seriesCallbackStub = sinon.stub(Series, '_seriesCallback');
-            seriesCallbackStub.bind = seriesCallbackBindStub = sinon.stub();
         });
 
         beforeEach(function() {
