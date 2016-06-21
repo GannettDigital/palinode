@@ -141,6 +141,10 @@ describe('map-each - unit tests', function() {
                 MapEach._mapEachCallback(allDoneStub, inputArray, iteratee, 3, ['yay', 'res', 'u'], null, 'lts');
             });
 
+            after(function() {
+                MapEach._mapEachCallback.restore();
+            });
+
             it('should bind allDone callback, inputArray, forEachMethod, index and results to the mapEach callback', function() {
                 expect(mapEachCallbackBindStub.args[0]).to.eql([
                     null, allDoneStub, inputArray, iteratee, 4, ['yay', 'res', 'u', 'lts']
