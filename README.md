@@ -1,6 +1,7 @@
 # palinode
 NodeJS callback-based flow control utility library.  Palinode focuses on a pure, dependency free, no-frills, native javascript implementation.  Palinode is intentionally not compatible with browsers; it is intended for NodeJS only.
 
+[![npm version](https://badge.fury.io/js/palinode.svg)](https://badge.fury.io/js/palinode)
 [![Build Status](https://travis-ci.org/GannettDigital/palinode.svg?branch=master)](https://travis-ci.org/GannettDigital/palinode)  [![Coverage Status](https://coveralls.io/repos/github/GannettDigital/palinode/badge.svg?branch=master)](https://coveralls.io/github/GannettDigital/palinode?branch=master)
 
 palinode (noun): a poem in which the poet retracts a view or sentiment expressed in a former poem. - source: Google. 
