@@ -142,7 +142,7 @@ describe('map-each - unit tests', function() {
             });
 
             after(function() {
-                MapEach._mapEachCallback.restore();
+                MapEach._mapEachCallback.bind.restore();
             });
 
             it('should bind allDone callback, inputArray, forEachMethod, index and results to the mapEach callback', function() {
