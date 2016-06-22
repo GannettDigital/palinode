@@ -11,7 +11,7 @@ describe('concurrent - practical test', function() {
     var numTasksToRun;
     var tasks;
     var expectedResult;
-    var MapConcurrent;
+    var Concurrent;
 
     function taskOfRandomDuration(taskId, callback) {
         setTimeout(function() {
@@ -21,7 +21,7 @@ describe('concurrent - practical test', function() {
 
     before('setup variables', function() {
         numTasksToRun = 10;
-        MapConcurrent = require('../../lib/concurrent.js');
+        Concurrent = require('../../lib/concurrent.js');
     });
 
     describe('positive practical tests', function() {
@@ -44,7 +44,7 @@ describe('concurrent - practical test', function() {
         var error;
         var result;
         before('run test', function(done) {
-            MapConcurrent.concurrent(tasks, function(err, res) {
+            Concurrent.concurrent(tasks, function(err, res) {
                 error = err;
                 result = res;
                 done();
@@ -101,7 +101,7 @@ describe('concurrent - practical test', function() {
                 done();
             }
 
-            MapConcurrent.concurrent(tasks, callbackSpy = sinon.spy(callback));
+            Concurrent.concurrent(tasks, callbackSpy = sinon.spy(callback));
         });
 
         it('should callback with an error if one of the tasks calls back with error', function() {
