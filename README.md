@@ -61,7 +61,7 @@ var functions = [
 series(functions, function(error, result) {
     console.log(result);
     //outputs: 15
-}
+});
 ```
 
 ### Map Each
@@ -73,7 +73,7 @@ The input array is not mutated.
 var mapEach = require('palinode').mapEach;
 var inputArray = [1,2,3,4,5,6,7,8,9,10];
 
-functon square(input, callback) {
+function square(input, callback) {
     return callback(null, input * input);
 }
 
@@ -82,4 +82,36 @@ mapEach(inputArray, square, function(error, result) {
     //outputs: [1,4,9,16,25,36,49,64,81,100]
 });
 
+```
+
+### Concurrent
+Schedules each function to be executed on the next tick, invoking a callback when all have been successful.  If any error occurs, all outstanding callbacks will have no effect. Results are accumulated into an array, where the position of each result corresponds to the position of the function.  
+
+#### Input function callback expectations
+All functions are expected to accept a callback in the form:
+```Javascript
+function(error, result) {}
+```
+Any parameters passed after `result` are ignored.
+
+#### Example usage
+```Javascript
+var concurrent = require('palinode').concurrent;
+
+function taskOfRandomDuration(number, callback) {
+    setTimeout(function() {
+        callback(null, number * number);
+    }, Math.floor((Math.random() * 3000) + 250));
+}
+
+var tasks = [
+    taskOfRandomDuration.bind(null, 2),
+    taskOfRandomDuration.bind(null, 4),
+    taskOfRandomDuration.bind(null, 8),
+];
+
+concurrent(tasks, function(err, res) {
+    console.log(res);
+    //outputs: [4, 16, 64]
+});
 ```

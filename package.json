@@ -15,6 +15,7 @@
   "homepage": "https://github.com/GannettDigital/palinode#readme",
   "devDependencies": {
     "chai": "3.5.0",
+    "chai-things": "^0.2.0",
     "coveralls": "2.11.9",
     "istanbul": "0.4.3",
     "jscs": "3.0.4",
