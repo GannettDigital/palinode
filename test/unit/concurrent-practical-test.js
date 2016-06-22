@@ -21,7 +21,7 @@ describe('map-concurrent - practical test', function() {
 
     before('setup variables', function() {
         numTasksToRun = 10;
-        MapConcurrent = require('../../lib/map-concurrent.js');
+        MapConcurrent = require('../../lib/concurrent.js');
     });
 
     describe('positive practical tests', function() {
@@ -44,7 +44,7 @@ describe('map-concurrent - practical test', function() {
         var error;
         var result;
         before('run test', function(done) {
-            MapConcurrent.mapConcurrent(tasks, function(err, res) {
+            MapConcurrent.concurrent(tasks, function(err, res) {
                 error = err;
                 result = res;
                 done();
@@ -101,7 +101,7 @@ describe('map-concurrent - practical test', function() {
                 done();
             }
 
-            MapConcurrent.mapConcurrent(tasks, callbackSpy = sinon.spy(callback));
+            MapConcurrent.concurrent(tasks, callbackSpy = sinon.spy(callback));
         });
 
         it('should callback with an error if one of the tasks calls back with error', function() {
