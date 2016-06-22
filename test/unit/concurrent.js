@@ -10,7 +10,7 @@ describe('concurrent - unit tests', function() {
     var nextTickStub;
     var callbackSpy;
     var callbackSpyBindStub;
-    var boundCallbackSpy = function boundCallbackSpy(){};
+    var boundCallbackSpy = function boundCallbackSpy() {};
 
     var mapConcurrentCallbackBindStub;
     var boundMapConcurrentCallback = function mapConcurrentCallbackBindResult() {};
@@ -61,7 +61,7 @@ describe('concurrent - unit tests', function() {
         });
 
         beforeEach(function() {
-            tasks.forEach(function(task) {task.bind.reset()});
+            tasks.forEach(function(task) {task.bind.reset();});
             mapConcurrentCallbackBindStub.reset();
             MapConcurrent.concurrent(tasks, callbackSpy);
         });
@@ -78,8 +78,8 @@ describe('concurrent - unit tests', function() {
         });
 
         it('should bind the bound _concurrentCallback to each task', function() {
-            var expectedBoundArgs = tasks.map(function (task) {
-                return task.bind.args[0]
+            var expectedBoundArgs = tasks.map(function(task) {
+                return task.bind.args[0];
             });
             expect(expectedBoundArgs).to.eql([
                 [null, boundMapConcurrentCallback],
@@ -88,7 +88,7 @@ describe('concurrent - unit tests', function() {
         });
 
         it('should call bind on all tasks', function() {
-            var result = tasks.map(function(task) { return task.bind.callCount});
+            var result = tasks.map(function(task) { return task.bind.callCount;});
             expect(result).to.all.equal(1);
         });
 
