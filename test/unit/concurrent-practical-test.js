@@ -5,7 +5,7 @@ var chai = require('chai');
 var expect = chai.expect;
 chai.use(require('chai-things'));
 
-describe('map-concurrent - practical test', function() {
+describe('concurrent - practical test', function() {
     this.timeout(10000);
 
     var numTasksToRun;
