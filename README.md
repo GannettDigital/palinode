@@ -128,7 +128,7 @@ concurrent(tasks, function(err, res) {
 - If any error occurs, all outstanding callbacks will have no effect.
 - If any error occurs, the result will be undefined - partial results are not provided.
 - Results are accumulated into an array, where the position of each result corresponds to the position of the input item.
-- Does not mutate the input array
+- Does not mutate the input array.
 
 #### Function expectations
 The function to run is expected to have a signature:
