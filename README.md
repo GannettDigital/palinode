@@ -86,9 +86,9 @@ mapEach(inputArray, square, function(error, result) {
 
 ### Concurrent
 - Schedules each function to be executed on the next tick.
-- Invokes a callback when all have been successful, of if any function calls back with error.  
+- Invokes a callback when all have been successful, or if any function calls back with error.  
 - If any error occurs, all outstanding callbacks will have no effect. 
-- If any error occurs, the result will be undefined - partial results are not provided
+- If any error occurs, the result will be undefined - partial results are not provided.
 - Results are accumulated into an array, where the position of each result corresponds to the position of the function.
 - The array of task functions is not mutated.
 
@@ -126,7 +126,7 @@ concurrent(tasks, function(err, res) {
 - Schedules all bound functions to be executed on next tick. 
 - Calls the callback when all functions have completed, or if any callback with error.  
 - If any error occurs, all outstanding callbacks will have no effect.
-- If any error occurs, the result will be undefined - partial results are not provided
+- If any error occurs, the result will be undefined - partial results are not provided.
 - Results are accumulated into an array, where the position of each result corresponds to the position of the input item.
 - Does not mutate the input array
 
@@ -152,7 +152,7 @@ function squareWithDelay(number, callback) {
 
 var inputItems = [1, 2, 3, 4, 5];
 
-mapConcurrent(inputItems, task, function(err, res) {
+mapConcurrent(inputItems, squareWithDelay, function(err, res) {
     console.log(res);
     //outputs: [1, 4, 9, 16, 25]
 });
