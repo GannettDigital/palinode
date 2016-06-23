@@ -85,8 +85,8 @@ mapEach(inputArray, square, function(error, result) {
 ```
 
 ### Concurrent
-- Schedules each function to be executed on the next tick
-- Invokes a callback when all have been successful.  
+- Schedules each function to be executed on the next tick.
+- Invokes a callback when all have been successful, of if any function calls back with error.  
 - If any error occurs, all outstanding callbacks will have no effect. 
 - If any error occurs, the result will be undefined - partial results are not provided
 - Results are accumulated into an array, where the position of each result corresponds to the position of the function.
@@ -122,8 +122,9 @@ concurrent(tasks, function(err, res) {
 ```
 
 ### MapConcurrent
-- Binds each input item to the provided function, scheduling all of invocations of the provided function to be executed on next tick. 
-- Calls the callback when complete.  
+- Binds each input item to the provided function.
+- Schedules all bound functions to be executed on next tick. 
+- Calls the callback when all functions have completed, or if any callback with error.  
 - If any error occurs, all outstanding callbacks will have no effect.
 - If any error occurs, the result will be undefined - partial results are not provided
 - Results are accumulated into an array, where the position of each result corresponds to the position of the input item.
