@@ -16,7 +16,7 @@ describe('concurrent - practical test', function() {
     function taskOfRandomDuration(taskId, callback) {
         setTimeout(function() {
             callback(null, 'i am task ' + taskId);
-        }, Math.floor((Math.random() * 3000) + 250));
+        }, Math.floor((Math.random() * 1500) + 150));
     }
 
     before('setup variables', function() {
