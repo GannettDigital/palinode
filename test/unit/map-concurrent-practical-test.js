@@ -28,7 +28,7 @@ describe('map-concurrent - practical test', function() {
         before('setup', function() {
             inputItems = [2, 32, 54, 65, 76];
             iterateeStub = sinon.spy(squareWithDelay);
-            expectedResult = inputItems.map(function(item){ return item * item});
+            expectedResult = inputItems.map(function(item) { return item * item;});
         });
 
         var error;
@@ -62,7 +62,7 @@ describe('map-concurrent - practical test', function() {
 
         function squareWithDelay(input, callback) {
             setTimeout(function() {
-                if(input*input > 100) {
+                if (input * input > 100) {
                     return callback(expectedError);
                 }
                 callback(null, input * input);
