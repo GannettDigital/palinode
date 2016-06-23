@@ -85,7 +85,12 @@ mapEach(inputArray, square, function(error, result) {
 ```
 
 ### Concurrent
-Schedules each function to be executed on the next tick, invoking a callback when all have been successful.  If any error occurs, all outstanding callbacks will have no effect. Results are accumulated into an array, where the position of each result corresponds to the position of the function.  
+- Schedules each function to be executed on the next tick
+- Invokes a callback when all have been successful.  
+- If any error occurs, all outstanding callbacks will have no effect. 
+- If any error occurs, the result will be undefined - partial results are not provided
+- Results are accumulated into an array, where the position of each result corresponds to the position of the function.
+- The array of task functions is not mutated.
 
 #### Input function callback expectations
 All functions are expected to accept a callback in the form:
@@ -113,5 +118,41 @@ var tasks = [
 concurrent(tasks, function(err, res) {
     console.log(res);
     //outputs: [4, 16, 64]
+});
+```
+
+### MapConcurrent
+- Binds each input item to the provided function, scheduling all of invocations of the provided function to be executed on next tick. 
+- Calls the callback when complete.  
+- If any error occurs, all outstanding callbacks will have no effect.
+- If any error occurs, the result will be undefined - partial results are not provided
+- Results are accumulated into an array, where the position of each result corresponds to the position of the input item.
+- Does not mutate the input array
+
+#### Function expectations
+The function to run is expected to have a signature:
+```Javascript
+function(inputItem, callback) {}
+```
+The function to run is expected to accept a callback in the form:
+```Javascript
+function(error, result) {}
+```
+
+#### Example usage
+```Javascript
+var mapConcurrent = require('palinode').mapConcurrent;
+
+function squareWithDelay(number, callback) {
+    setTimeout(function() {
+        callback(null, number * number);
+    }, Math.floor((Math.random() * 1500) + 150));
+}
+
+var inputItems = [1, 2, 3, 4, 5];
+
+mapConcurrent(inputItems, task, function(err, res) {
+    console.log(res);
+    //outputs: [1, 4, 9, 16, 25]
 });
 ```
