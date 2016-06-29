@@ -16,7 +16,7 @@ describe('concurrent - practical test', function() {
     function taskOfRandomDuration(taskId, callback) {
         setTimeout(function() {
             callback(null, 'i am task ' + taskId);
-        }, Math.floor((Math.random() * 3000) + 250));
+        }, Math.floor((Math.random() * 1500) + 150));
     }
 
     before('setup variables', function() {
@@ -60,6 +60,31 @@ describe('concurrent - practical test', function() {
                 return spy.callCount;
             });
             expect(expectedCallCount).to.all.equal(1);
+        });
+    });
+
+    describe('positive practical tests - empty input', function() {
+
+        before('setup input functions', function() {
+            tasks = [];
+        });
+
+        before('setup expected result data', function() {
+            expectedResult = [];
+        });
+
+        var error;
+        var result;
+        before('run test', function(done) {
+            Concurrent.concurrent(tasks, function(err, res) {
+                error = err;
+                result = res;
+                done();
+            });
+        });
+
+        it('should call back with the expected response when all functions have responded', function() {
+            expect(result).to.eql(expectedResult);
         });
     });
 

@@ -1,7 +1,15 @@
 {
   "name": "palinode",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "node callback-based flow control utility library",
+  "keywords": [
+    "flow",
+    "control",
+    "callback",
+    "asynchronous",
+    "concurrent",
+    "concurrency"
+  ],
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -20,6 +28,7 @@
     "istanbul": "0.4.3",
     "jscs": "3.0.4",
     "mocha": "2.4.5 ",
+    "mockery": "^1.7.0",
     "sinon": "1.17.4"
   },
   "scripts": {

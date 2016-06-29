@@ -6,17 +6,17 @@ var expect = chai.expect;
 chai.use(require('chai-things'));
 
 describe('concurrent - unit tests', function() {
-    var MapConcurrent;
+    var Concurrent;
     var nextTickStub;
     var callbackSpy;
     var callbackSpyBindStub;
     var boundCallbackSpy = function boundCallbackSpy() {};
 
     var mapConcurrentCallbackBindStub;
-    var boundMapConcurrentCallback = function mapConcurrentCallbackBindResult() {};
+    var boundConcurrentCallback = function concurrentCallbackBindResult() {};
 
     before(function() {
-        MapConcurrent = require('../../lib/concurrent.js');
+        Concurrent = require('../../lib/concurrent.js');
         nextTickStub = sinon.stub(process, 'nextTick');
         callbackSpy = sinon.spy();
         callbackSpy.bind = callbackSpyBindStub = sinon.stub().returns(boundCallbackSpy);
@@ -53,17 +53,17 @@ describe('concurrent - unit tests', function() {
         };
 
         before(function() {
-            mapConcurrentCallbackBindStub = sinon.stub(MapConcurrent._concurrentCallback, 'bind').returns(boundMapConcurrentCallback);
+            mapConcurrentCallbackBindStub = sinon.stub(Concurrent._concurrentCallback, 'bind').returns(boundConcurrentCallback);
         });
 
         after(function() {
-            MapConcurrent._concurrentCallback.bind.restore();
+            Concurrent._concurrentCallback.bind.restore();
         });
 
         beforeEach(function() {
             tasks.forEach(function(task) {task.bind.reset();});
             mapConcurrentCallbackBindStub.reset();
-            MapConcurrent.concurrent(tasks, callbackSpy);
+            Concurrent.concurrent(tasks, callbackSpy);
         });
 
         it('should bind the synchronization state, current index and callback to the _concurrentCallback - for each task', function() {
@@ -82,8 +82,8 @@ describe('concurrent - unit tests', function() {
                 return task.bind.args[0];
             });
             expect(expectedBoundArgs).to.eql([
-                [null, boundMapConcurrentCallback],
-                [null, boundMapConcurrentCallback]
+                [null, boundConcurrentCallback],
+                [null, boundConcurrentCallback]
             ]);
         });
 
@@ -94,6 +94,46 @@ describe('concurrent - unit tests', function() {
 
         it('should invoke process.nextTick once for each task', function() {
             expect(nextTickStub.callCount).to.equal(tasks.length);
+        });
+    });
+
+    describe('concurrent - entry point - empty input', function() {
+        var tasks = [];
+        var forEachStub;
+        before(function() {
+            mapConcurrentCallbackBindStub = sinon.stub(Concurrent._concurrentCallback, 'bind').returns(boundConcurrentCallback);
+            forEachStub = sinon.stub(Array.prototype, 'forEach');
+        });
+
+        after(function() {
+            Concurrent._concurrentCallback.bind.restore();
+            Array.prototype.forEach.restore();
+        });
+
+        beforeEach(function() {
+            forEachStub.reset();
+            mapConcurrentCallbackBindStub.reset();
+            Concurrent.concurrent(tasks, callbackSpy);
+        });
+
+        it('should bind null and empty array to the callback', function() {
+            expect(callbackSpyBindStub.args[0]).to.eql([
+                null, null, []
+            ]);
+        });
+
+        it('should invoke process.nextTick once for each task', function() {
+            expect(nextTickStub.callCount).to.equal(1);
+        });
+
+        it('should invoke process.nextTick with the bound callback', function() {
+            expect(nextTickStub.args[0]).to.eql([
+               boundCallbackSpy
+            ]);
+        });
+
+        it('should not call forEach when the input is an empty array', function() {
+            expect(forEachStub.callCount).to.equal(0);
         });
     });
 
@@ -109,7 +149,7 @@ describe('concurrent - unit tests', function() {
                     numComplete: 3,
                     results: [4,3,2]
                 };
-                var boundCallback = MapConcurrent._concurrentCallback.bind(syncState);
+                var boundCallback = Concurrent._concurrentCallback.bind(syncState);
                 boundCallback(3, callbackSpy, error, 'should be ignored because there is an error');
             });
 
@@ -150,7 +190,7 @@ describe('concurrent - unit tests', function() {
                     results: [4,3,2],
                     error: new Error('previously recorded')
                 };
-                var boundCallback = MapConcurrent._concurrentCallback.bind(syncState);
+                var boundCallback = Concurrent._concurrentCallback.bind(syncState);
                 boundCallback(3, callbackSpy, error, 'should be ignored because there is an error');
             });
 
@@ -181,7 +221,7 @@ describe('concurrent - unit tests', function() {
                     result: 'this is result'
                 };
 
-                var boundCallback = MapConcurrent._concurrentCallback.bind(testParams.syncState);
+                var boundCallback = Concurrent._concurrentCallback.bind(testParams.syncState);
                 boundCallback(testParams.index, callbackSpy, null, testParams.result);
             });
 
@@ -207,7 +247,7 @@ describe('concurrent - unit tests', function() {
                     result: 'this is result'
                 };
 
-                var boundCallback = MapConcurrent._concurrentCallback.bind(testParams.syncState);
+                var boundCallback = Concurrent._concurrentCallback.bind(testParams.syncState);
                 boundCallback(testParams.index, callbackSpy, null, testParams.result);
             });
 
