@@ -56,6 +56,35 @@ describe('map-concurrent - practical test', function() {
         });
     });
 
+    describe('positive practical tests - empty input', function() {
+
+        function squareWithDelay(input, callback) {
+            setTimeout(function() {
+                callback(null, input * input);
+            }, Math.floor((Math.random() * 1500) + 150));
+        }
+
+        before('setup', function() {
+            inputItems = [];
+            iterateeStub = sinon.spy(squareWithDelay);
+            expectedResult = [];
+        });
+
+        var error;
+        var result;
+        before('run test', function(done) {
+            MapConcurrent.mapConcurrent(inputItems, iterateeStub, function(err, res) {
+                error = err;
+                result = res;
+                done();
+            });
+        });
+
+        it('should call back with the expected response when all functions have responded', function() {
+            expect(result).to.eql(expectedResult);
+        });
+    });
+
     describe('one function calling back with error', function() {
 
         var expectedError = new Error('we could not do it all');

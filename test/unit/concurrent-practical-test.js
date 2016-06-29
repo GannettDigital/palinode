@@ -63,6 +63,31 @@ describe('concurrent - practical test', function() {
         });
     });
 
+    describe('positive practical tests - empty input', function() {
+
+        before('setup input functions', function() {
+            tasks = [];
+        });
+
+        before('setup expected result data', function() {
+            expectedResult = [];
+        });
+
+        var error;
+        var result;
+        before('run test', function(done) {
+            Concurrent.concurrent(tasks, function(err, res) {
+                error = err;
+                result = res;
+                done();
+            });
+        });
+
+        it('should call back with the expected response when all functions have responded', function() {
+            expect(result).to.eql(expectedResult);
+        });
+    });
+
     describe('one function calling back with error', function() {
 
         var expectedError = new Error('we could not do it all');

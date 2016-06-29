@@ -97,6 +97,38 @@ describe('concurrent - unit tests', function() {
         });
     });
 
+    describe('concurrent - entry point - empty input', function() {
+        var tasks = [];
+        before(function() {
+            mapConcurrentCallbackBindStub = sinon.stub(Concurrent._concurrentCallback, 'bind').returns(boundConcurrentCallback);
+        });
+
+        after(function() {
+            Concurrent._concurrentCallback.bind.restore();
+        });
+
+        beforeEach(function() {
+            mapConcurrentCallbackBindStub.reset();
+            Concurrent.concurrent(tasks, callbackSpy);
+        });
+
+        it('should bind null and empty array to the callback', function() {
+            expect(callbackSpyBindStub.args[0]).to.eql([
+                null, null, []
+            ]);
+        });
+
+        it('should invoke process.nextTick once for each task', function() {
+            expect(nextTickStub.callCount).to.equal(1);
+        });
+
+        it('should invoke process.nextTick with the bound callback', function() {
+            expect(nextTickStub.args[0]).to.eql([
+               boundCallbackSpy
+            ]);
+        });
+    });
+
     describe('concurrent - callback', function() {
 
         describe('on first invocation with an error with an error', function() {
