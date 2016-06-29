@@ -99,15 +99,19 @@ describe('concurrent - unit tests', function() {
 
     describe('concurrent - entry point - empty input', function() {
         var tasks = [];
+        var forEachStub;
         before(function() {
             mapConcurrentCallbackBindStub = sinon.stub(Concurrent._concurrentCallback, 'bind').returns(boundConcurrentCallback);
+            forEachStub = sinon.stub(Array.prototype, 'forEach');
         });
 
         after(function() {
             Concurrent._concurrentCallback.bind.restore();
+            Array.prototype.forEach.restore();
         });
 
         beforeEach(function() {
+            forEachStub.reset();
             mapConcurrentCallbackBindStub.reset();
             Concurrent.concurrent(tasks, callbackSpy);
         });
@@ -126,6 +130,10 @@ describe('concurrent - unit tests', function() {
             expect(nextTickStub.args[0]).to.eql([
                boundCallbackSpy
             ]);
+        });
+
+        it('should not call forEach when the input is an empty array', function() {
+            expect(forEachStub.callCount).to.equal(0);
         });
     });
 
