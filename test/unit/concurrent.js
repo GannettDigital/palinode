@@ -1,5 +1,6 @@
 'use strict';
 
+var mockery = require('mockery');
 var sinon = require('sinon');
 var chai = require('chai');
 var expect = chai.expect;
@@ -12,11 +13,7 @@ describe('concurrent - unit tests', function() {
     var callbackSpyBindStub;
     var boundCallbackSpy = function boundCallbackSpy() {};
 
-    var mapConcurrentCallbackBindStub;
-    var boundConcurrentCallback = function concurrentCallbackBindResult() {};
-
     before(function() {
-        Concurrent = require('../../lib/concurrent.js');
         nextTickStub = sinon.stub(process, 'nextTick');
         callbackSpy = sinon.spy();
         callbackSpy.bind = callbackSpyBindStub = sinon.stub().returns(boundCallbackSpy);
@@ -33,111 +30,44 @@ describe('concurrent - unit tests', function() {
     });
 
     describe('concurrent - entry point', function() {
-        var task1Stub = sinon.stub();
-        var task2Stub = sinon.stub();
-        task1Stub.bind = sinon.stub().returns(task1Bound);
-        task2Stub.bind = sinon.stub().returns(task2Bound);
-
-        function task1Bound() {}
-        function task2Bound() {}
-
-        var tasks = [
-            task1Stub,
-            task2Stub
-        ];
-
-        var syncState = {
-            numToDo: tasks.length,
-            numComplete: 0,
-            results: []
-        };
+        var invokeConcurrentlySpy;
+        var inputFunctions = [function one(){}, function two(){}];
 
         before(function() {
-            mapConcurrentCallbackBindStub = sinon.stub(Concurrent._concurrentCallback, 'bind').returns(boundConcurrentCallback);
-        });
-
-        after(function() {
-            Concurrent._concurrentCallback.bind.restore();
-        });
-
-        beforeEach(function() {
-            tasks.forEach(function(task) {task.bind.reset();});
-            mapConcurrentCallbackBindStub.reset();
-            Concurrent.concurrent(tasks, callbackSpy);
-        });
-
-        it('should bind the synchronization state, current index and callback to the _concurrentCallback - for each task', function() {
-            expect(mapConcurrentCallbackBindStub.args).to.eql([
-                [syncState, 0, callbackSpy],
-                [syncState, 1, callbackSpy]
-            ]);
-        });
-
-        it('should bind _concurrentCallback once for each task', function() {
-            expect(mapConcurrentCallbackBindStub.callCount).to.equal(tasks.length);
-        });
-
-        it('should bind the bound _concurrentCallback to each task', function() {
-            var expectedBoundArgs = tasks.map(function(task) {
-                return task.bind.args[0];
+            mockery.enable({
+                useCleanCache: true
             });
-            expect(expectedBoundArgs).to.eql([
-                [null, boundConcurrentCallback],
-                [null, boundConcurrentCallback]
-            ]);
-        });
-
-        it('should call bind on all tasks', function() {
-            var result = tasks.map(function(task) { return task.bind.callCount;});
-            expect(result).to.all.equal(1);
-        });
-
-        it('should invoke process.nextTick once for each task', function() {
-            expect(nextTickStub.callCount).to.equal(tasks.length);
-        });
-    });
-
-    describe('concurrent - entry point - empty input', function() {
-        var tasks = [];
-        var forEachStub;
-        before(function() {
-            mapConcurrentCallbackBindStub = sinon.stub(Concurrent._concurrentCallback, 'bind').returns(boundConcurrentCallback);
-            forEachStub = sinon.stub(Array.prototype, 'forEach');
-        });
-
-        after(function() {
-            Concurrent._concurrentCallback.bind.restore();
-            Array.prototype.forEach.restore();
+            mockery.registerAllowable('../../lib/concurrent.js');
+            mockery.registerMock('./invoke-concurrently.js', invokeConcurrentlySpy = sinon.spy());
+            Concurrent = require('../../lib/concurrent.js');
         });
 
         beforeEach(function() {
-            forEachStub.reset();
-            mapConcurrentCallbackBindStub.reset();
-            Concurrent.concurrent(tasks, callbackSpy);
+            invokeConcurrentlySpy.reset();
+            Concurrent.concurrent(inputFunctions, callbackSpy);
         });
 
-        it('should bind null and empty array to the callback', function() {
-            expect(callbackSpyBindStub.args[0]).to.eql([
-                null, null, []
+        after(function(){
+            mockery.deregisterAll();
+            mockery.disable();
+        });
+
+        it('should call invokeConcurrently with the inputFunctions, _concurrentCallback and callback', function() {
+            expect(invokeConcurrentlySpy.args[0]).to.eql([
+                inputFunctions, Concurrent._concurrentCallback, callbackSpy
             ]);
         });
 
-        it('should invoke process.nextTick once for each task', function() {
-            expect(nextTickStub.callCount).to.equal(1);
-        });
-
-        it('should invoke process.nextTick with the bound callback', function() {
-            expect(nextTickStub.args[0]).to.eql([
-               boundCallbackSpy
-            ]);
-        });
-
-        it('should not call forEach when the input is an empty array', function() {
-            expect(forEachStub.callCount).to.equal(0);
+        it('should call invokeConcurrently only once', function() {
+            expect(invokeConcurrentlySpy.callCount).to.equal(1);
         });
     });
 
     describe('concurrent - callback', function() {
+
+        before(function() {
+            Concurrent = require('../../lib/concurrent.js');
+        });
 
         describe('on first invocation with an error with an error', function() {
             var syncState;

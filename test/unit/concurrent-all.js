@@ -5,7 +5,7 @@ var chai = require('chai');
 var expect = chai.expect;
 chai.use(require('chai-things'));
 
-describe('concurrent - unit tests', function() {
+describe('concurrent all - unit tests', function() {
     var Concurrent;
     var nextTickStub;
     var callbackSpy;
@@ -32,7 +32,7 @@ describe('concurrent - unit tests', function() {
         process.nextTick.restore();
     });
 
-    describe('concurrent - entry point', function() {
+    describe('concurrent all - entry point', function() {
         var task1Stub = sinon.stub();
         var task2Stub = sinon.stub();
         task1Stub.bind = sinon.stub().returns(task1Bound);
