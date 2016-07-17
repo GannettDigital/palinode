@@ -131,7 +131,7 @@ concurrent(tasks, function(err, res) {
 - Does not mutate the input array.
 
 #### Function expectations
-The function to run is expected to have a signature:
+Input functions are expected expected to have a signature:
 ```Javascript
 function(inputItem, callback) {}
 ```
@@ -157,3 +157,9 @@ mapConcurrent(inputItems, squareWithDelay, function(err, res) {
     //outputs: [1, 4, 9, 16, 25]
 });
 ```
+
+## ConcurrentAll
+- Same inputs as Concurrent
+- Attempts ALL functions
+- Retains all result information, including errors
+- Calls back with a count of errors.
