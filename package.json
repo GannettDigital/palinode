@@ -23,12 +23,12 @@
   "homepage": "https://github.com/GannettDigital/palinode#readme",
   "devDependencies": {
     "chai": "3.5.0",
-    "chai-things": "^0.2.0",
-    "coveralls": "2.11.9",
-    "istanbul": "0.4.3",
-    "jscs": "3.0.4",
-    "mocha": "2.4.5 ",
-    "mockery": "^1.7.0",
+    "chai-things": "0.2.0",
+    "coveralls": "2.11.11",
+    "istanbul": "0.4.4",
+    "jscs": "3.0.7",
+    "mocha": "2.5.3 ",
+    "mockery": "1.7.0",
     "sinon": "1.17.4"
   },
   "scripts": {
