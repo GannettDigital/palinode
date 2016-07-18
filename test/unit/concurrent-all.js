@@ -1,276 +1,253 @@
 'use strict';
 
+var mockery = require('mockery');
 var sinon = require('sinon');
 var chai = require('chai');
 var expect = chai.expect;
 chai.use(require('chai-things'));
 
 describe('concurrent all - unit tests', function() {
-    var Concurrent;
+    var ConcurrentAll;
     var nextTickStub;
     var callbackSpy;
     var callbackSpyBindStub;
-    var boundCallbackSpy = function boundCallbackSpy() {};
+    var boundCallbackSpy = function boundCallbackSpy() {
+    };
 
-    var mapConcurrentCallbackBindStub;
-    var boundConcurrentCallback = function concurrentCallbackBindResult() {};
-
-    before(function() {
-        Concurrent = require('../../lib/concurrent.js');
+    before(function () {
         nextTickStub = sinon.stub(process, 'nextTick');
         callbackSpy = sinon.spy();
         callbackSpy.bind = callbackSpyBindStub = sinon.stub().returns(boundCallbackSpy);
     });
 
-    beforeEach(function() {
+    beforeEach(function () {
         nextTickStub.reset();
         callbackSpy.reset();
         callbackSpyBindStub.reset();
     });
 
-    after(function() {
+    after(function () {
         process.nextTick.restore();
     });
 
-    describe('concurrent all - entry point', function() {
-        var task1Stub = sinon.stub();
-        var task2Stub = sinon.stub();
-        task1Stub.bind = sinon.stub().returns(task1Bound);
-        task2Stub.bind = sinon.stub().returns(task2Bound);
+    describe('concurrent all - entry point', function () {
+        var invokeConcurrentlySpy;
+        var inputFunctions = [function one() {
+        }, function two() {
+        }];
 
-        function task1Bound() {}
-        function task2Bound() {}
-
-        var tasks = [
-            task1Stub,
-            task2Stub
-        ];
-
-        var syncState = {
-            numToDo: tasks.length,
-            numComplete: 0,
-            results: []
-        };
-
-        before(function() {
-            mapConcurrentCallbackBindStub = sinon.stub(Concurrent._concurrentCallback, 'bind').returns(boundConcurrentCallback);
-        });
-
-        after(function() {
-            Concurrent._concurrentCallback.bind.restore();
-        });
-
-        beforeEach(function() {
-            tasks.forEach(function(task) {task.bind.reset();});
-            mapConcurrentCallbackBindStub.reset();
-            Concurrent.concurrent(tasks, callbackSpy);
-        });
-
-        it('should bind the synchronization state, current index and callback to the _concurrentCallback - for each task', function() {
-            expect(mapConcurrentCallbackBindStub.args).to.eql([
-                [syncState, 0, callbackSpy],
-                [syncState, 1, callbackSpy]
-            ]);
-        });
-
-        it('should bind _concurrentCallback once for each task', function() {
-            expect(mapConcurrentCallbackBindStub.callCount).to.equal(tasks.length);
-        });
-
-        it('should bind the bound _concurrentCallback to each task', function() {
-            var expectedBoundArgs = tasks.map(function(task) {
-                return task.bind.args[0];
+        before(function () {
+            mockery.enable({
+                useCleanCache: true
             });
-            expect(expectedBoundArgs).to.eql([
-                [null, boundConcurrentCallback],
-                [null, boundConcurrentCallback]
+            mockery.registerAllowable('../../lib/concurrent-all.js');
+            mockery.registerMock('./invoke-concurrently.js', invokeConcurrentlySpy = sinon.spy());
+            ConcurrentAll = require('../../lib/concurrent-all.js');
+        });
+
+        beforeEach(function () {
+            invokeConcurrentlySpy.reset();
+            ConcurrentAll.concurrentAll(inputFunctions, callbackSpy);
+        });
+
+        after(function () {
+            mockery.deregisterAll();
+            mockery.disable();
+        });
+
+        it('should call invokeConcurrently with the inputFunctions, _concurrentCallback and callback', function () {
+            expect(invokeConcurrentlySpy.args[0]).to.eql([
+                inputFunctions, ConcurrentAll._concurrentAllCallback, callbackSpy
             ]);
         });
 
-        it('should call bind on all tasks', function() {
-            var result = tasks.map(function(task) { return task.bind.callCount;});
-            expect(result).to.all.equal(1);
-        });
-
-        it('should invoke process.nextTick once for each task', function() {
-            expect(nextTickStub.callCount).to.equal(tasks.length);
+        it('should call invokeConcurrently only once', function () {
+            expect(invokeConcurrentlySpy.callCount).to.equal(1);
         });
     });
 
-    describe('concurrent - entry point - empty input', function() {
-        var tasks = [];
-        var forEachStub;
-        before(function() {
-            mapConcurrentCallbackBindStub = sinon.stub(Concurrent._concurrentCallback, 'bind').returns(boundConcurrentCallback);
-            forEachStub = sinon.stub(Array.prototype, 'forEach');
+    describe('concurrent all - callback', function () {
+
+        var allDone;
+        var context;
+
+        before(function () {
+            allDone = sinon.spy();
+            allDone.bind = sinon.stub().returns('result of allDone.bind');
+            ConcurrentAll = require('../../lib/concurrent-all.js');
         });
 
-        after(function() {
-            Concurrent._concurrentCallback.bind.restore();
-            Array.prototype.forEach.restore();
+        beforeEach(function () {
+            allDone.reset();
+            allDone.bind.reset();
+            context = {
+                numToDo: 5,
+                numComplete: 0,
+                results: []
+            };
         });
 
-        beforeEach(function() {
-            forEachStub.reset();
-            mapConcurrentCallbackBindStub.reset();
-            Concurrent.concurrent(tasks, callbackSpy);
-        });
-
-        it('should bind null and empty array to the callback', function() {
-            expect(callbackSpyBindStub.args[0]).to.eql([
-                null, null, []
-            ]);
-        });
-
-        it('should invoke process.nextTick once for each task', function() {
-            expect(nextTickStub.callCount).to.equal(1);
-        });
-
-        it('should invoke process.nextTick with the bound callback', function() {
-            expect(nextTickStub.args[0]).to.eql([
-               boundCallbackSpy
-            ]);
-        });
-
-        it('should not call forEach when the input is an empty array', function() {
-            expect(forEachStub.callCount).to.equal(0);
-        });
-    });
-
-    describe('concurrent - callback', function() {
-
-        describe('on first invocation with an error with an error', function() {
-            var syncState;
-            var error = new Error('it rained today');
-
-            beforeEach(function() {
-                syncState = {
-                    numToDo: 10,
-                    numComplete: 3,
-                    results: [4,3,2]
-                };
-                var boundCallback = Concurrent._concurrentCallback.bind(syncState);
-                boundCallback(3, callbackSpy, error, 'should be ignored because there is an error');
+        describe('invoking with the first error', function () {
+            beforeEach(function () {
+                ConcurrentAll._concurrentAllCallback.call(context, 4, allDone, 'oh noes an error');
             });
 
-            it('should invoke process.nextTick once if invoked with an error', function() {
-                expect(callbackSpyBindStub.callCount).to.equal(1);
+            it('should update the context when it encounters the first error', function () {
+                expect(context.numErrors).to.equal(1);
             });
 
-            it('should bind the error to the allDone callback', function() {
-                expect(callbackSpyBindStub.args[0]).to.eql([
-                    null, error
-                ]);
+            it('should increment the context numComplete', function () {
+                expect(context.numComplete).to.equal(1);
             });
 
-            it('should invoke process.nextTick with the bound allDone callback', function() {
-                expect(nextTickStub.args[0]).to.eql([
-                    boundCallbackSpy
-                ]);
-            });
-
-            it('should assign the error to the error property of the syncState', function() {
-                expect(syncState).to.eql({
-                    numToDo: 10,
-                    numComplete: 3,
-                    results: [4,3,2],
-                    error: error
+            it('should add the error to the correct position in the result array', function () {
+                expect(context.results[4]).to.eql({
+                    error: 'oh noes an error',
+                    result: null
                 });
             });
         });
 
-        describe('on n+1 invocation with an error', function() {
-            var syncState;
-            var error = new Error('this error is new');
-
-            beforeEach(function() {
-                syncState = {
-                    numToDo: 10,
-                    numComplete: 3,
-                    results: [4,3,2],
-                    error: new Error('previously recorded')
+        describe('invoking with a second error', function () {
+            beforeEach(function () {
+                context.results[4] = {
+                    error: 'oh noes an error',
+                    result: null
                 };
-                var boundCallback = Concurrent._concurrentCallback.bind(syncState);
-                boundCallback(3, callbackSpy, error, 'should be ignored because there is an error');
+                context.numErrors = 1;
+                context.numComplete = 1;
+                ConcurrentAll._concurrentAllCallback.call(context, 3, allDone, 'oh noes an error');
             });
 
-            it('should not invoke process.nextTick', function() {
-                expect(callbackSpyBindStub.callCount).to.equal(0);
+            it('should update the context when it encounters the first error', function () {
+                expect(context.numErrors).to.equal(2);
             });
 
-            it('should not update the syncState', function() {
-                expect(syncState).to.eql({
-                    numToDo: 10,
-                    numComplete: 3,
-                    results: [4,3,2],
-                    error: new Error('previously recorded')
+            it('should increment the context numComplete', function () {
+                expect(context.numComplete).to.equal(2);
+            });
+
+            it('should add the error to the correct position in the result array', function () {
+                expect(context.results[3]).to.eql({
+                    error: 'oh noes an error',
+                    result: null
+                });
+            });
+
+            it('should accumulate the errors into the results array', function() {
+                expect(context.results).to.eql([
+                    ,
+                    ,
+                    ,
+                    {
+                        error: 'oh noes an error',
+                        result: null
+                    },
+                    {
+                        error: 'oh noes an error',
+                        result: null
+                    }
+                ])
+            });
+        });
+
+        describe('invoking without an error', function() {
+            var possibleResults = [{an: 'object'}, [1, 'array'], 'string', null, undefined];
+
+            possibleResults.forEach(function(result) {
+                describe('invoking with a(n) ' + result + ' result', function() {
+                    beforeEach(function() {
+                        ConcurrentAll._concurrentAllCallback.call(context, 3, allDone, null, result);
+                    });
+
+                    it('should increment the context numComplete', function() {
+                        expect(context.numComplete).to.equal(1);
+                    });
+
+                    it('should set the appropriate element in the results array', function() {
+                        expect(context.results).to.eql([
+                            ,
+                            ,
+                            ,
+                            {error: null, result: result}
+                        ]);
+                    });
+
+                    it('should not increment the errors counter', function() {
+                        expect(context.numErrors).to.equal(undefined);
+                    })
                 });
             });
         });
 
-        describe('invocations without error', function() {
-            var testParams;
-            beforeEach(function() {
-                testParams = {
-                    syncState: {
-                        numToDo: 10,
-                        numComplete: 2,
-                        results: [4, 2]
-                    },
-                    index: 3,
-                    result: 'this is result'
-                };
-
-                var boundCallback = Concurrent._concurrentCallback.bind(testParams.syncState);
-                boundCallback(testParams.index, callbackSpy, null, testParams.result);
+        describe('invoking with a truthy error and a truthy result', function() {
+            beforeEach(function () {
+                ConcurrentAll._concurrentAllCallback.call(context, 4, allDone, 'oh noes an error', 'also has a result');
             });
 
-            it('should increment the syncState numComplete', function() {
-                expect(testParams.syncState.numComplete).to.equal(3);
+            it('should update the context when it encounters the first error', function () {
+                expect(context.numErrors).to.equal(1);
             });
 
-            it('should update the syncState result at the index position', function() {
-                expect(testParams.syncState.results).to.eql([4, 2, ,'this is result']);
+            it('should increment the context numComplete', function () {
+                expect(context.numComplete).to.equal(1);
+            });
+
+            it('should add the error to the correct position in the result array', function () {
+                expect(context.results[4]).to.eql({
+                    error: 'oh noes an error',
+                    result: null
+                });
             });
         });
 
-        describe('final invocations all without errors', function() {
-            var testParams;
-            beforeEach(function() {
-                testParams = {
-                    syncState: {
-                        numToDo: 3,
-                        numComplete: 2,
-                        results: [4, 2]
-                    },
-                    index: 2,
-                    result: 'this is result'
-                };
-
-                var boundCallback = Concurrent._concurrentCallback.bind(testParams.syncState);
-                boundCallback(testParams.index, callbackSpy, null, testParams.result);
+        describe('final iteration invocation when errors have occurred', function() {
+            beforeEach(function () {
+                context.numComplete = 2;
+                context.numToDo = 3;
+                context.numErrors = 1;
+                ConcurrentAll._concurrentAllCallback.call(context, 2, allDone, null, 'also has a result');
             });
 
-            it('should increment the syncState numComplete', function() {
-                expect(testParams.syncState.numComplete).to.equal(3);
-            });
-
-            it('should update the syncState result at the index position', function() {
-                expect(testParams.syncState.results).to.eql([4, 2, 'this is result']);
-            });
-
-            it('should bind null and the syncState results to the allDone callback', function() {
-                expect(callbackSpyBindStub.args[0]).to.eql([
-                    null, null, [4, 2, 'this is result']
+            it('should bind expected null, numErrors and the results array to the allDone callback', function() {
+                expect(allDone.bind.args[0]).to.eql([
+                    null,
+                    1,
+                    context.results
                 ]);
             });
 
-            it('should invoke process.nextTick with the bound callback', function() {
-                expect(nextTickStub.args[0]).to.eql([boundCallbackSpy]);
+            it('should call allDone.bind only once', function() {
+                expect(allDone.bind.callCount).to.equal(1);
             });
 
-            it('should invoke process.nextTick once', function() {
-                expect(nextTickStub.callCount).to.equal(1);
+            it('should provide invoke process.nextTick with the bound allDone callback', function() {
+                expect(nextTickStub.args[0]).to.eql(['result of allDone.bind'])
+            });
+        });
+
+        describe('final iteration invocation when no errors have occurred', function() {
+            beforeEach(function () {
+                context.numComplete = 2;
+                context.numToDo = 3;
+                context.numErrors = 0;
+                ConcurrentAll._concurrentAllCallback.call(context, 2, allDone, null, 'also has a result');
+            });
+
+            it('should bind expected null, numErrors and the results array to the allDone callback', function() {
+                expect(allDone.bind.args[0]).to.eql([
+                    null,
+                    null,
+                    context.results
+                ]);
+            });
+
+            it('should call allDone.bind only once', function() {
+                expect(allDone.bind.callCount).to.equal(1);
+            });
+
+            it('should provide invoke process.nextTick with the bound allDone callback', function() {
+                expect(nextTickStub.args[0]).to.eql(['result of allDone.bind'])
             });
         });
     });
