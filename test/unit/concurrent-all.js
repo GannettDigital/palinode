@@ -14,29 +14,30 @@ describe('concurrent all - unit tests', function() {
     var boundCallbackSpy = function boundCallbackSpy() {
     };
 
-    before(function () {
+    before(function() {
         nextTickStub = sinon.stub(process, 'nextTick');
         callbackSpy = sinon.spy();
         callbackSpy.bind = callbackSpyBindStub = sinon.stub().returns(boundCallbackSpy);
     });
 
-    beforeEach(function () {
+    beforeEach(function() {
         nextTickStub.reset();
         callbackSpy.reset();
         callbackSpyBindStub.reset();
     });
 
-    after(function () {
+    after(function() {
         process.nextTick.restore();
     });
 
-    describe('concurrent all - entry point', function () {
+    describe('concurrent all - entry point', function() {
         var invokeConcurrentlySpy;
-        var inputFunctions = [function one() {
-        }, function two() {
-        }];
+        var inputFunctions = [
+            function one() {},
+            function two() {}
+        ];
 
-        before(function () {
+        before(function() {
             mockery.enable({
                 useCleanCache: true
             });
@@ -45,39 +46,39 @@ describe('concurrent all - unit tests', function() {
             ConcurrentAll = require('../../lib/concurrent-all.js');
         });
 
-        beforeEach(function () {
+        beforeEach(function() {
             invokeConcurrentlySpy.reset();
             ConcurrentAll.concurrentAll(inputFunctions, callbackSpy);
         });
 
-        after(function () {
+        after(function() {
             mockery.deregisterAll();
             mockery.disable();
         });
 
-        it('should call invokeConcurrently with the inputFunctions, _concurrentCallback and callback', function () {
+        it('should call invokeConcurrently with the inputFunctions, _concurrentCallback and callback', function() {
             expect(invokeConcurrentlySpy.args[0]).to.eql([
                 inputFunctions, ConcurrentAll._concurrentAllCallback, callbackSpy
             ]);
         });
 
-        it('should call invokeConcurrently only once', function () {
+        it('should call invokeConcurrently only once', function() {
             expect(invokeConcurrentlySpy.callCount).to.equal(1);
         });
     });
 
-    describe('concurrent all - callback', function () {
+    describe('concurrent all - callback', function() {
 
         var allDone;
         var context;
 
-        before(function () {
+        before(function() {
             allDone = sinon.spy();
             allDone.bind = sinon.stub().returns('result of allDone.bind');
             ConcurrentAll = require('../../lib/concurrent-all.js');
         });
 
-        beforeEach(function () {
+        beforeEach(function() {
             allDone.reset();
             allDone.bind.reset();
             context = {
@@ -87,20 +88,20 @@ describe('concurrent all - unit tests', function() {
             };
         });
 
-        describe('invoking with the first error', function () {
-            beforeEach(function () {
+        describe('invoking with the first error', function() {
+            beforeEach(function() {
                 ConcurrentAll._concurrentAllCallback.call(context, 4, allDone, 'oh noes an error');
             });
 
-            it('should update the context when it encounters the first error', function () {
+            it('should update the context when it encounters the first error', function() {
                 expect(context.numErrors).to.equal(1);
             });
 
-            it('should increment the context numComplete', function () {
+            it('should increment the context numComplete', function() {
                 expect(context.numComplete).to.equal(1);
             });
 
-            it('should add the error to the correct position in the result array', function () {
+            it('should add the error to the correct position in the result array', function() {
                 expect(context.results[4]).to.eql({
                     error: 'oh noes an error',
                     result: null
@@ -108,8 +109,8 @@ describe('concurrent all - unit tests', function() {
             });
         });
 
-        describe('invoking with a second error', function () {
-            beforeEach(function () {
+        describe('invoking with a second error', function() {
+            beforeEach(function() {
                 context.results[4] = {
                     error: 'oh noes an error',
                     result: null
@@ -119,15 +120,15 @@ describe('concurrent all - unit tests', function() {
                 ConcurrentAll._concurrentAllCallback.call(context, 3, allDone, 'oh noes an error');
             });
 
-            it('should update the context when it encounters the first error', function () {
+            it('should update the context when it encounters the first error', function() {
                 expect(context.numErrors).to.equal(2);
             });
 
-            it('should increment the context numComplete', function () {
+            it('should increment the context numComplete', function() {
                 expect(context.numComplete).to.equal(2);
             });
 
-            it('should add the error to the correct position in the result array', function () {
+            it('should add the error to the correct position in the result array', function() {
                 expect(context.results[3]).to.eql({
                     error: 'oh noes an error',
                     result: null
@@ -135,8 +136,7 @@ describe('concurrent all - unit tests', function() {
             });
 
             it('should accumulate the errors into the results array', function() {
-                expect(context.results).to.eql([
-                    ,
+                expect(context.results).to.eql([ ,
                     ,
                     ,
                     {
@@ -147,7 +147,7 @@ describe('concurrent all - unit tests', function() {
                         error: 'oh noes an error',
                         result: null
                     }
-                ])
+                ]);
             });
         });
 
@@ -165,8 +165,7 @@ describe('concurrent all - unit tests', function() {
                     });
 
                     it('should set the appropriate element in the results array', function() {
-                        expect(context.results).to.eql([
-                            ,
+                        expect(context.results).to.eql([ ,
                             ,
                             ,
                             {error: null, result: result}
@@ -175,25 +174,25 @@ describe('concurrent all - unit tests', function() {
 
                     it('should not increment the errors counter', function() {
                         expect(context.numErrors).to.equal(undefined);
-                    })
+                    });
                 });
             });
         });
 
         describe('invoking with a truthy error and a truthy result', function() {
-            beforeEach(function () {
+            beforeEach(function() {
                 ConcurrentAll._concurrentAllCallback.call(context, 4, allDone, 'oh noes an error', 'also has a result');
             });
 
-            it('should update the context when it encounters the first error', function () {
+            it('should update the context when it encounters the first error', function() {
                 expect(context.numErrors).to.equal(1);
             });
 
-            it('should increment the context numComplete', function () {
+            it('should increment the context numComplete', function() {
                 expect(context.numComplete).to.equal(1);
             });
 
-            it('should add the error to the correct position in the result array', function () {
+            it('should add the error to the correct position in the result array', function() {
                 expect(context.results[4]).to.eql({
                     error: 'oh noes an error',
                     result: null
@@ -202,7 +201,7 @@ describe('concurrent all - unit tests', function() {
         });
 
         describe('final iteration invocation when errors have occurred', function() {
-            beforeEach(function () {
+            beforeEach(function() {
                 context.numComplete = 2;
                 context.numToDo = 3;
                 context.numErrors = 1;
@@ -222,12 +221,12 @@ describe('concurrent all - unit tests', function() {
             });
 
             it('should provide invoke process.nextTick with the bound allDone callback', function() {
-                expect(nextTickStub.args[0]).to.eql(['result of allDone.bind'])
+                expect(nextTickStub.args[0]).to.eql(['result of allDone.bind']);
             });
         });
 
         describe('final iteration invocation when no errors have occurred', function() {
-            beforeEach(function () {
+            beforeEach(function() {
                 context.numComplete = 2;
                 context.numToDo = 3;
                 context.numErrors = 0;
@@ -247,7 +246,7 @@ describe('concurrent all - unit tests', function() {
             });
 
             it('should provide invoke process.nextTick with the bound allDone callback', function() {
-                expect(nextTickStub.args[0]).to.eql(['result of allDone.bind'])
+                expect(nextTickStub.args[0]).to.eql(['result of allDone.bind']);
             });
         });
     });

@@ -31,7 +31,7 @@ describe('concurrent - unit tests', function() {
 
     describe('concurrent - entry point', function() {
         var invokeConcurrentlySpy;
-        var inputFunctions = [function one(){}, function two(){}];
+        var inputFunctions = [function one() {}, function two() {}];
 
         before(function() {
             mockery.enable({
@@ -47,7 +47,7 @@ describe('concurrent - unit tests', function() {
             Concurrent.concurrent(inputFunctions, callbackSpy);
         });
 
-        after(function(){
+        after(function() {
             mockery.deregisterAll();
             mockery.disable();
         });
