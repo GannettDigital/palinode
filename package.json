@@ -1,6 +1,6 @@
 {
   "name": "palinode",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "node callback-based flow control utility library",
   "keywords": [
     "flow",
