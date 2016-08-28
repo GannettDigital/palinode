@@ -158,8 +158,39 @@ mapConcurrent(inputItems, squareWithDelay, function(err, res) {
 });
 ```
 
-## ConcurrentAll
-- Same inputs as Concurrent
+## ConcurrentAll/MapConcurrentAll
+- Follows the same pattern as the non-all counterparts
 - Attempts ALL functions
 - Retains all result information, including errors
 - Calls back with a count of errors.
+
+### mapConcurrentAll Example
+```
+var mapConcurrentAll = require('./lib/map-concurrent-all.js').mapConcurrentAll;
+var inputs = [1, 2];
+
+function iteratee(input, callback) {
+    if(input === 2) {
+        callback(new Error('2'));
+    } else {
+        callback(null, input)
+    }
+}
+
+mapConcurrentAll(inputs, iteratee, function(error, result){
+    console.log('NumErrors: ' + error);
+    console.log('Results: ' + JSON.stringify(result));
+});
+
+/*
+ NumErrors: 1
+ Results: [{
+   "error": null,
+   "result": 1
+ }, {
+   "error": {},
+   "result": null
+ }]
+ */
+ ```
+
