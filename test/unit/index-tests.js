@@ -58,37 +58,37 @@ describe('index - unit tests', function() {
         expect(Object.keys(palinode).length).to.equal(6);
     });
 
-    it('should have the property \'series\' with the value from \'require(\'./lib/series.js\').', function() {
+    it('should have the property \'series\' with the value from require(\'./lib/series.js\').series', function() {
         palinode = require('../../index.js');
 
         expect(palinode.series).to.deep.equal(series);
     });
 
-    it('should have the property \'mapEach\' with the value from \'require(\'./lib/map-each.js\').', function() {
+    it('should have the property \'mapEach\' with the value from require(\'./lib/map-each.js\').mapEach', function() {
         palinode = require('../../index.js');
 
         expect(palinode.mapEach).to.deep.equal(mapEach);
     });
 
-    it('should have the property \'concurrent\' with the value from \'require(\'./lib/concurrent.js\').', function() {
+    it('should have the property \'concurrent\' with the value from require(\'./lib/concurrent.js\').concurrent', function() {
         palinode = require('../../index.js');
 
         expect(palinode.concurrent).to.deep.equal(concurrent);
     });
 
-    it('should have the property \'concurrentAll\' with the value from \'require(\'./lib/concurrent-all.js\').', function() {
+    it('should have the property \'concurrentAll\' with the value from require(\'./lib/concurrent-all.js\').concurrentAll', function() {
         palinode = require('../../index.js');
 
         expect(palinode.concurrentAll).to.deep.equal(concurrentAll);
     });
 
-    it('should have the property \'mapConcurrent\' with the value from \'require(\'./lib/map-concurrent.js\').', function() {
+    it('should have the property \'mapConcurrent\' with the value from require(\'./lib/map-concurrent.js\').mapConcurrent', function() {
         palinode = require('../../index.js');
 
         expect(palinode.mapConcurrent).to.deep.equal(mapConcurrent);
     });
 
-    it('should have the property \'mapConcurrentAll\' with the value from \'require(\'./lib/map-concurrent-all.js\').', function() {
+    it('should have the property \'mapConcurrentAll\' with the value from require(\'./lib/map-concurrent-all.js\').mapConcurrentAll', function() {
         palinode = require('../../index.js');
 
         expect(palinode.mapConcurrentAll).to.deep.equal(mapConcurrentAll);
