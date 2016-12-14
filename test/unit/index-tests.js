@@ -19,12 +19,12 @@ describe('index - unit tests', function() {
         mockery.enable({useCleanCache: true});
         mockery.registerAllowable('../../index.js');
     });
-    
+
     after(function() {
         mockery.deregisterAll();
         mockery.disable();
     });
-    
+
     beforeEach(function() {
         series = sinon.stub();
         mapEach = sinon.stub();
@@ -41,7 +41,7 @@ describe('index - unit tests', function() {
         mockery.registerMock('./lib/map-concurrent-all.js', {mapConcurrentAll: mapConcurrentAll});
 
     });
-    
+
     afterEach(function() {
         mockery.resetCache();
         mockery.deregisterMock('./lib/series.js');
@@ -57,7 +57,7 @@ describe('index - unit tests', function() {
 
         expect(Object.keys(palinode).length).to.equal(6);
     });
-    
+
     it('should have the property \'series\' with the value from \'require(\'./lib/series.js\').', function() {
         palinode = require('../../index.js');
 
