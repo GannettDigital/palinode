@@ -33,4 +33,4 @@ node_modules
 .idea
 
 # local override config files
-config/local.js
+package-lock.json

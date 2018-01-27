@@ -1,21 +1,21 @@
 'use strict';
 
-var sinon = require('sinon');
-var chai = require('chai');
-var expect = chai.expect;
+const sinon = require('sinon');
+const chai = require('chai');
+const expect = chai.expect;
 chai.use(require('chai-things'));
 
 describe('concurrent - practical test', function() {
     this.timeout(10000);
 
-    var numTasksToRun;
-    var tasks;
-    var expectedResult;
-    var Concurrent;
+    let numTasksToRun;
+    let tasks;
+    let expectedResult;
+    let Concurrent;
 
     function taskOfRandomDuration(taskId, callback) {
         setTimeout(function() {
-            callback(null, 'i am task ' + taskId);
+            callback(null, `i am task ${taskId}`);
         }, Math.floor((Math.random() * 1500) + 150));
     }
 
@@ -28,21 +28,21 @@ describe('concurrent - practical test', function() {
 
         before('setup input functions', function() {
             tasks = [];
-            for (var i = 0; i < 10; i++) {
-                var spy = sinon.spy(taskOfRandomDuration.bind(null, i));
+            for (let i = 0; i < 10; i++) {
+                const spy = sinon.spy(taskOfRandomDuration.bind(null, i));
                 tasks.push(spy);
             }
         });
 
         before('setup expected result data', function() {
             expectedResult = [];
-            for (var i = 0; i < 10; ++i) {
-                expectedResult.push('i am task ' + i);
+            for (let i = 0; i < 10; ++i) {
+                expectedResult.push(`i am task ${i}`);
             }
         });
 
-        var error;
-        var result;
+        let error;
+        let result;
         before('run test', function(done) {
             Concurrent.concurrent(tasks, function(err, res) {
                 error = err;
@@ -56,7 +56,7 @@ describe('concurrent - practical test', function() {
         });
 
         it('should call all of the functions once', function() {
-            var expectedCallCount = tasks.map(function(spy) {
+            const expectedCallCount = tasks.map(function(spy) {
                 return spy.callCount;
             });
             expect(expectedCallCount).to.all.equal(1);
@@ -73,8 +73,8 @@ describe('concurrent - practical test', function() {
             expectedResult = [];
         });
 
-        var error;
-        var result;
+        let error;
+        let result;
         before('run test', function(done) {
             Concurrent.concurrent(tasks, function(err, res) {
                 error = err;
@@ -90,7 +90,7 @@ describe('concurrent - practical test', function() {
 
     describe('one function calling back with error', function() {
 
-        var expectedError = new Error('we could not do it all');
+        const expectedError = new Error('we could not do it all');
 
         function callbackSuccessImmediately(taskId, callback) {
             setTimeout(function() {
@@ -116,9 +116,9 @@ describe('concurrent - practical test', function() {
             ];
         });
 
-        var error;
-        var result;
-        var callbackSpy;
+        let error;
+        let result;
+        let callbackSpy;
         before('run test', function(done) {
             function callback(err, res) {
                 error = err;

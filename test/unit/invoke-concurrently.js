@@ -1,15 +1,15 @@
 'use strict';
 
-var sinon = require('sinon');
-var chai = require('chai');
-var expect = chai.expect;
+const sinon = require('sinon');
+const chai = require('chai');
+const expect = chai.expect;
 
 describe('invoke concurrently', function() {
 
-    var invokeConcurrently;
-    var nextTickStub;
-    var allDoneCallbackSpy;
-    var operationSpecificCallbackSpy;
+    let invokeConcurrently;
+    let nextTickStub;
+    let allDoneCallbackSpy;
+    let operationSpecificCallbackSpy;
 
     before(function() {
         operationSpecificCallbackSpy = sinon.spy();
@@ -27,8 +27,8 @@ describe('invoke concurrently', function() {
     });
 
     describe('invocation with an empty array of functions', function() {
-        var allDoneBindStub;
-        var boundAllDone;
+        let allDoneBindStub;
+        let boundAllDone;
 
         before(function() {
             allDoneBindStub = sinon.stub(allDoneCallbackSpy, 'bind').returns(boundAllDone = sinon.spy());
@@ -62,15 +62,15 @@ describe('invoke concurrently', function() {
     });
 
     describe('invocation with multiple functions', function() {
-        var operationSpecificCallbackBindStub;
-        var boundOperationSpecificCallback;
-        var inputFunctions = [
+        let operationSpecificCallbackBindStub;
+        let boundOperationSpecificCallback;
+        const inputFunctions = [
             sinon.spy(), sinon.spy()
         ];
 
         before(function() {
             inputFunctions.forEach(function(inputFunction, index) {
-                inputFunction.bind = sinon.stub().returns('function' + index + '_bindResult');
+                inputFunction.bind = sinon.stub().returns(`function${index}_bindResult`);
             });
             operationSpecificCallbackBindStub = sinon.stub(operationSpecificCallbackSpy, 'bind')
                 .returns(boundOperationSpecificCallback = sinon.spy());
@@ -112,18 +112,18 @@ describe('invoke concurrently', function() {
         });
 
         inputFunctions.forEach(function(inputFunction, index) {
-            it('should invoke bind with null context and the bound operation specific callback on the input function at index ' + index, function() {
+            it(`should invoke bind with null context and the bound operation specific callback on the input function at index ${index}`, function() {
                 expect(inputFunction.bind.args[0]).to.eql([
                     null, boundOperationSpecificCallback
                 ]);
             });
 
-            it('should invoke bind only once on the input function at index ' + index, function() {
+            it(`should invoke bind only once on the input function at index ${index}`, function() {
                 expect(inputFunction.bind.callCount).to.equal(1);
             });
 
-            it('should invoke process.nextTick with result of binding the input function at index ' + index, function() {
-                expect(nextTickStub.args[index]).to.eql(['function' + index + '_bindResult']);
+            it(`should invoke process.nextTick with result of binding the input function at index ${index}`, function() {
+                expect(nextTickStub.args[index]).to.eql([`function${index}_bindResult`]);
             });
         });
 

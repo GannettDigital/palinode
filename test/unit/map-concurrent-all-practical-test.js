@@ -1,8 +1,8 @@
 'use strict';
 
-var sinon = require('sinon');
-var chai = require('chai');
-var expect = chai.expect;
+const sinon = require('sinon');
+const chai = require('chai');
+const expect = chai.expect;
 
 describe('map-concurrent-all - practical tests', function() {
     this.timeout(10000);
@@ -10,19 +10,19 @@ describe('map-concurrent-all - practical tests', function() {
     function iteratee(numberToTest, callback) {
         setTimeout(function() {
             if (numberToTest % 2 === 0) {
-                callback(null, 'even numbers should succeed ' + numberToTest);
+                callback(null, `even numbers should succeed ${numberToTest}`);
             } else {
-                callback(new Error('odd odd should fail ' + numberToTest));
+                callback(new Error(`odd odd should fail ${numberToTest}`));
             }
 
         }, Math.floor((Math.random() * 500) + 50));
     }
 
-    var numInputItems;
-    var input;
-    var expectedResult;
-    var expectedNumErrors;
-    var MapConcurrentAll;
+    let numInputItems;
+    let input;
+    let expectedResult;
+    let expectedNumErrors;
+    let MapConcurrentAll;
 
     before('setup variables', function() {
         numInputItems = 10;
@@ -33,7 +33,7 @@ describe('map-concurrent-all - practical tests', function() {
 
         before('setup input', function() {
             input = [];
-            for (var i = 0; i < numInputItems; i++) {
+            for (let i = 0; i < numInputItems; i++) {
                 input.push(i);
             }
         });
@@ -41,17 +41,17 @@ describe('map-concurrent-all - practical tests', function() {
         before('setup expected result data', function() {
             expectedNumErrors = numInputItems / 2;
             expectedResult = [];
-            for (var i = 0; i < numInputItems; ++i) {
+            for (let i = 0; i < numInputItems; ++i) {
                 if (i % 2 === 0) {
-                    expectedResult.push({error: null, result: 'even numbers should succeed ' + i});
+                    expectedResult.push({error: null, result: `even numbers should succeed ${i}`});
                 } else {
-                    expectedResult.push({error: new Error('odd numbers should fail ' + i), result: null});
+                    expectedResult.push({error: new Error(`odd numbers should fail ${i}`), result: null});
                 }
             }
         });
 
-        var error;
-        var result;
+        let error;
+        let result;
         before('run test', function(done) {
             MapConcurrentAll.mapConcurrentAll(input, iteratee, function(err, res) {
                 error = err;

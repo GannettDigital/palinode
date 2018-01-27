@@ -1,8 +1,8 @@
 'use strict';
 
-var sinon = require('sinon');
-var chai = require('chai');
-var expect = chai.expect;
+const sinon = require('sinon');
+const chai = require('chai');
+const expect = chai.expect;
 
 describe('concurrent-all - practical tests', function() {
     this.timeout(10000);
@@ -10,19 +10,19 @@ describe('concurrent-all - practical tests', function() {
     function taskOfRandomDuration(taskId, callback) {
         setTimeout(function() {
             if (taskId % 2 === 0) {
-                callback(null, 'even tasks should succeed ' + taskId);
+                callback(null, `even tasks should succeed ${taskId}`);
             } else {
-                callback(new Error('odd tasks should fail ' + taskId));
+                callback(new Error(`odd tasks should fail ${taskId}`));
             }
 
         }, Math.floor((Math.random() * 500) + 50));
     }
 
-    var numTasksToRun;
-    var tasks;
-    var expectedResult;
-    var expectedNumErrors;
-    var ConcurrentAll;
+    let numTasksToRun;
+    let tasks;
+    let expectedResult;
+    let expectedNumErrors;
+    let ConcurrentAll;
 
     before('setup variables', function() {
         numTasksToRun = 10;
@@ -33,8 +33,8 @@ describe('concurrent-all - practical tests', function() {
 
         before('setup input functions', function() {
             tasks = [];
-            for (var i = 0; i < numTasksToRun; i++) {
-                var spy = sinon.spy(taskOfRandomDuration.bind(null, i));
+            for (let i = 0; i < numTasksToRun; i++) {
+                const spy = sinon.spy(taskOfRandomDuration.bind(null, i));
                 tasks.push(spy);
             }
         });
@@ -42,17 +42,17 @@ describe('concurrent-all - practical tests', function() {
         before('setup expected result data', function() {
             expectedNumErrors = numTasksToRun / 2;
             expectedResult = [];
-            for (var i = 0; i < numTasksToRun; ++i) {
+            for (let i = 0; i < numTasksToRun; ++i) {
                 if (i % 2 === 0) {
-                    expectedResult.push({error: null, result: 'even tasks should succeed ' + i});
+                    expectedResult.push({error: null, result: `even tasks should succeed ${i}`});
                 } else {
-                    expectedResult.push({error: new Error('odd tasks should fail ' + i), result: null});
+                    expectedResult.push({error: new Error(`odd tasks should fail ${i}`), result: null});
                 }
             }
         });
 
-        var error;
-        var result;
+        let error;
+        let result;
         before('run test', function(done) {
             ConcurrentAll.concurrentAll(tasks, function(err, res) {
                 error = err;

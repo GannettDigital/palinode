@@ -1,15 +1,15 @@
 'use strict';
 
-var mockery = require('mockery');
-var sinon = require('sinon');
-var chai = require('chai');
-var expect = chai.expect;
+const mockery = require('mockery');
+const sinon = require('sinon');
+const chai = require('chai');
+const expect = chai.expect;
 chai.use(require('chai-things'));
 
 describe('map-concurrent - unit tests', function() {
-    var MapConcurrent;
-    var callbackSpy;
-    var concurrentSpy;
+    let MapConcurrent;
+    let callbackSpy;
+    let concurrentSpy;
 
     before(function() {
         callbackSpy = sinon.spy();
@@ -29,12 +29,12 @@ describe('map-concurrent - unit tests', function() {
     after(mockery.disable);
 
     describe('map-concurrent - entry point', function() {
-        var iterateeStub = sinon.stub();
-        var iterateeBindStub = sinon.stub(iterateeStub, 'bind').returns(boundIteratee);
+        const iterateeStub = sinon.stub();
+        const iterateeBindStub = sinon.stub(iterateeStub, 'bind').returns(boundIteratee);
 
         function boundIteratee() {}
 
-        var inputItems = [1, 2];
+        const inputItems = [1, 2];
 
         after(function() {
             iterateeBindStub.restore();
@@ -61,12 +61,12 @@ describe('map-concurrent - unit tests', function() {
     });
 
     describe('map-concurrent - entry point - empty input', function() {
-        var iterateeStub = sinon.stub();
-        var iterateeBindStub = sinon.stub(iterateeStub, 'bind').returns(boundIteratee);
+        const iterateeStub = sinon.stub();
+        const iterateeBindStub = sinon.stub(iterateeStub, 'bind').returns(boundIteratee);
 
         function boundIteratee() {}
 
-        var inputItems = [];
+        const inputItems = [];
 
         after(function() {
             iterateeBindStub.restore();

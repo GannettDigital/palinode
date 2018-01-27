@@ -1,15 +1,15 @@
 'use strict';
 
-var sinon = require('sinon');
-var expect = require('chai').expect;
+const sinon = require('sinon');
+const expect = require('chai').expect;
 
 describe('series', function() {
 
-    var Series;
-    var function0;
-    var function1;
-    var inputFunctions;
-    var nextTickStub;
+    let Series;
+    let function0;
+    let function1;
+    let inputFunctions;
+    let nextTickStub;
 
     before(function() {
         Series = require('../../lib/series.js');
@@ -25,12 +25,12 @@ describe('series', function() {
     });
 
     describe('series - entry point', function() {
-        var seriesCallbackStub;
-        var seriesCallbackBindStub;
-        var seriesCallbackBindResult = function seriesCallbackBindResult() {};
-        var function0BindResult = function function0BindResult() {};
-        var function0BindStub;
-        var function1BindStub;
+        let seriesCallbackStub;
+        let seriesCallbackBindStub;
+        const seriesCallbackBindResult = function seriesCallbackBindResult() {};
+        const function0BindResult = function function0BindResult() {};
+        let function0BindStub;
+        let function1BindStub;
 
         before(function() {
             seriesCallbackStub = sinon.stub(Series, '_seriesCallback');
@@ -62,7 +62,7 @@ describe('series', function() {
         });
 
         it('should bind the provided callback, function array and 1 to Series._seriesCallback', function() {
-            var callbackSpy = sinon.spy();
+            const callbackSpy = sinon.spy();
             Series.series(inputFunctions, callbackSpy);
             expect(seriesCallbackBindStub.args[0]).to.eql([
                 null, callbackSpy, inputFunctions, 1
@@ -88,12 +88,12 @@ describe('series', function() {
     });
 
     describe('series - callback wrapper', function() {
-        var allDoneSpy;
-        var allDoneBindStub;
-        var allDoneBindResult = {result: 'of allDone.bind'};
+        let allDoneSpy;
+        let allDoneBindStub;
+        const allDoneBindResult = {result: 'of allDone.bind'};
 
-        var seriesCallbackBindStub;
-        var applyBindStub;
+        let seriesCallbackBindStub;
+        let applyBindStub;
 
         before(function() {
             seriesCallbackBindStub = sinon.stub(Series._seriesCallback, 'bind');
@@ -115,7 +115,7 @@ describe('series', function() {
         });
 
         describe('invoked with error', function() {
-            var expectedError;
+            let expectedError;
             beforeEach(function() {
                 expectedError = new Error('whatever');
                 Series._seriesCallback(allDoneSpy, inputFunctions, 1, expectedError);
@@ -135,8 +135,8 @@ describe('series', function() {
         });
 
         describe('final invocation, no errors', function() {
-            var arg1, arg2, arg3;
-            var applyBindStubResult = {there: 'was a fire fight!!!'};
+            let arg1, arg2, arg3;
+            const applyBindStubResult = {there: 'was a fire fight!!!'};
 
             beforeEach(function() {
                 arg1 = {iAm: 'an object'};
@@ -147,15 +147,15 @@ describe('series', function() {
             });
 
             it('should bind the results such that null is in the first position to indicate no error', function() {
-                var bindStubArgs = applyBindStub.args[0];
-                var bindStubResultsArgs = bindStubArgs[2];
+                const bindStubArgs = applyBindStub.args[0];
+                const bindStubResultsArgs = bindStubArgs[2];
                 expect(bindStubResultsArgs[0]).to.eql(null);
             });
 
             it('should bind the null, and results to the allDone.apply method', function() {
-                 expect(applyBindStub.args[0]).to.eql([
-                     allDoneSpy, null, [null, arg1, arg2, arg3]
-                 ]);
+                expect(applyBindStub.args[0]).to.eql([
+                    allDoneSpy, null, [null, arg1, arg2, arg3]
+                ]);
             });
 
             it('should invoke process.nextTick with the result of the apply.bind', function() {
@@ -168,9 +168,9 @@ describe('series', function() {
         });
 
         describe('continuing invocations', function() {
-            var arg1, arg2, arg3;
-            var seriesCallbackBindResult;
-            var fakeNext;
+            let arg1, arg2, arg3;
+            let seriesCallbackBindResult;
+            let fakeNext;
 
             beforeEach(function() {
                 arg1 = {iAm: 'an object'};

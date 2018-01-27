@@ -1,17 +1,17 @@
 'use strict';
 
-var expect = require('chai').expect;
-var sinon = require('sinon');
+const expect = require('chai').expect;
+const sinon = require('sinon');
 
 describe('series - practical test', function() {
-    var Series;
-    var functionSeries = [];
-    var initialA;
-    var initialB;
-    var numTimesToAdd;
-    var numToAddEachTime;
+    let Series;
+    const functionSeries = [];
+    let initialA;
+    let initialB;
+    let numTimesToAdd;
+    let numToAddEachTime;
 
-    var addSpy;
+    let addSpy;
     function add(a, b, callback) {
         callback(null, a + b, numToAddEachTime);
     }
@@ -26,13 +26,13 @@ describe('series - practical test', function() {
         addSpy = sinon.spy(add);
 
         functionSeries.push(addSpy.bind(null, initialA, initialB));
-        for (var i = 0; i < numTimesToAdd; ++i) {
+        for (let i = 0; i < numTimesToAdd; ++i) {
             functionSeries.push(addSpy);
         }
     });
 
-    var error;
-    var result;
+    let error;
+    let result;
     beforeEach(function(done) {
         addSpy.reset();
         Series.series(functionSeries, function(err, res) {

@@ -1,19 +1,19 @@
 'use strict';
 
-var mockery = require('mockery');
-var sinon = require('sinon');
-var chai = require('chai');
-var expect = chai.expect;
+const mockery = require('mockery');
+const sinon = require('sinon');
+const chai = require('chai');
+const expect = chai.expect;
 chai.use(require('chai-things'));
 
 describe('index - unit tests', function() {
-    var series;
-    var mapEach;
-    var concurrent;
-    var concurrentAll;
-    var mapConcurrent;
-    var mapConcurrentAll;
-    var palinode;
+    let series;
+    let mapEach;
+    let concurrent;
+    let concurrentAll;
+    let mapConcurrent;
+    let mapConcurrentAll;
+    let palinode;
 
     before(function() {
         mockery.enable({useCleanCache: true});
