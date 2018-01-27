@@ -1,17 +1,17 @@
 'use strict';
 
-var sinon = require('sinon');
-var chai = require('chai');
-var expect = chai.expect;
+const sinon = require('sinon');
+const chai = require('chai');
+const expect = chai.expect;
 chai.use(require('chai-things'));
 
 describe('map-concurrent - practical test', function() {
     this.timeout(10000);
 
-    var iterateeStub;
-    var inputItems;
-    var expectedResult;
-    var MapConcurrent;
+    let iterateeStub;
+    let inputItems;
+    let expectedResult;
+    let MapConcurrent;
 
     before('setup variables', function() {
         MapConcurrent = require('../../lib/map-concurrent.js');
@@ -28,11 +28,11 @@ describe('map-concurrent - practical test', function() {
         before('setup', function() {
             inputItems = [2, 32, 54, 65, 76];
             iterateeStub = sinon.spy(squareWithDelay);
-            expectedResult = inputItems.map(function(item) { return item * item;});
+            expectedResult = inputItems.map(function(item) { return item * item; });
         });
 
-        var error;
-        var result;
+        let error;
+        let result;
         before('run test', function(done) {
             MapConcurrent.mapConcurrent(inputItems, iterateeStub, function(err, res) {
                 error = err;
@@ -70,8 +70,8 @@ describe('map-concurrent - practical test', function() {
             expectedResult = [];
         });
 
-        var error;
-        var result;
+        let error;
+        let result;
         before('run test', function(done) {
             MapConcurrent.mapConcurrent(inputItems, iterateeStub, function(err, res) {
                 error = err;
@@ -87,7 +87,7 @@ describe('map-concurrent - practical test', function() {
 
     describe('one function calling back with error', function() {
 
-        var expectedError = new Error('we could not do it all');
+        const expectedError = new Error('we could not do it all');
 
         function squareWithDelay(input, callback) {
             setTimeout(function() {
@@ -103,9 +103,9 @@ describe('map-concurrent - practical test', function() {
             iterateeStub = sinon.spy(squareWithDelay);
         });
 
-        var error;
-        var result;
-        var callbackSpy;
+        let error;
+        let result;
+        let callbackSpy;
         before('run test', function(done) {
             function callback(err, res) {
                 error = err;

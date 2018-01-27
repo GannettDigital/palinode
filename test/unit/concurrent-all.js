@@ -1,17 +1,17 @@
 'use strict';
 
-var mockery = require('mockery');
-var sinon = require('sinon');
-var chai = require('chai');
-var expect = chai.expect;
+const mockery = require('mockery');
+const sinon = require('sinon');
+const chai = require('chai');
+const expect = chai.expect;
 chai.use(require('chai-things'));
 
 describe('concurrent all - unit tests', function() {
-    var ConcurrentAll;
-    var nextTickStub;
-    var callbackSpy;
-    var callbackSpyBindStub;
-    var boundCallbackSpy = function boundCallbackSpy() {
+    let ConcurrentAll;
+    let nextTickStub;
+    let callbackSpy;
+    let callbackSpyBindStub;
+    const boundCallbackSpy = function boundCallbackSpy() {
     };
 
     before(function() {
@@ -31,8 +31,8 @@ describe('concurrent all - unit tests', function() {
     });
 
     describe('concurrent all - entry point', function() {
-        var invokeConcurrentlySpy;
-        var inputFunctions = [
+        let invokeConcurrentlySpy;
+        const inputFunctions = [
             function one() {},
             function two() {}
         ];
@@ -69,8 +69,8 @@ describe('concurrent all - unit tests', function() {
 
     describe('concurrent all - callback', function() {
 
-        var allDone;
-        var context;
+        let allDone;
+        let context;
 
         before(function() {
             allDone = sinon.spy();
@@ -136,9 +136,8 @@ describe('concurrent all - unit tests', function() {
             });
 
             it('should accumulate the errors into the results array', function() {
-                expect(context.results).to.eql([ ,
-                    ,
-                    ,
+                expect(context.results).to.eql([,, ,
+
                     {
                         error: 'oh noes an error',
                         result: null
@@ -152,10 +151,10 @@ describe('concurrent all - unit tests', function() {
         });
 
         describe('invoking without an error', function() {
-            var possibleResults = [{an: 'object'}, [1, 'array'], 'string', null, undefined];
+            const possibleResults = [{an: 'object'}, [1, 'array'], 'string', null, undefined];
 
             possibleResults.forEach(function(result) {
-                describe('invoking with a(n) ' + result + ' result', function() {
+                describe(`invoking with a(n) ${result} result`, function() {
                     beforeEach(function() {
                         ConcurrentAll._concurrentAllCallback.call(context, 3, allDone, null, result);
                     });
@@ -165,9 +164,8 @@ describe('concurrent all - unit tests', function() {
                     });
 
                     it('should set the appropriate element in the results array', function() {
-                        expect(context.results).to.eql([ ,
-                            ,
-                            ,
+                        expect(context.results).to.eql([,, ,
+
                             {error: null, result: result}
                         ]);
                     });

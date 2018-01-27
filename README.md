@@ -166,7 +166,7 @@ mapConcurrent(inputItems, squareWithDelay, function(err, res) {
 
 ### mapConcurrentAll Example
 ```
-var mapConcurrentAll = require('./lib/map-concurrent-all.js').mapConcurrentAll;
+var mapConcurrentAll = require('palinode').mapConcurrentAll;
 var inputs = [1, 2];
 
 function iteratee(input, callback) {

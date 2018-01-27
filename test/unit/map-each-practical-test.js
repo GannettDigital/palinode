@@ -1,13 +1,13 @@
 'use strict';
 
-var expect = require('chai').expect;
-var sinon = require('sinon');
+const expect = require('chai').expect;
+const sinon = require('sinon');
 
 describe('map-each - practical test', function() {
-    var MapEach;
-    var inputArray = [1,2,3,4,5,6,7,8,9,10];
+    let MapEach;
+    const inputArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-    var squareSpy;
+    let squareSpy;
     function square(input, callback) {
         callback(null, input * input);
     }
@@ -17,8 +17,8 @@ describe('map-each - practical test', function() {
         squareSpy = sinon.spy(square);
     });
 
-    var error;
-    var result;
+    let error;
+    let result;
     beforeEach(function(done) {
         squareSpy.reset();
         MapEach.mapEach(inputArray, squareSpy, function(err, res) {
@@ -29,7 +29,7 @@ describe('map-each - practical test', function() {
     });
 
     it('should execute the provided callback for each element in the input array', function() {
-        expect(result).to.eql([1,4,9,16,25,36,49,64,81,100]);
+        expect(result).to.eql([1, 4, 9, 16, 25, 36, 49, 64, 81, 100]);
     });
 
     it('should call the iteratee once for each member of the input array', function() {

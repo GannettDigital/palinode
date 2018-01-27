@@ -1,20 +1,20 @@
 'use strict';
 
-var sinon = require('sinon');
-var expect = require('chai').expect;
+const sinon = require('sinon');
+const expect = require('chai').expect;
 
 describe('map-each - unit tests', function() {
 
-    var MapEach;
-    var nextTickStub;
-    var inputArray = [1,2,3,4,5];
-    var iteratee;
-    var iterateeBindStub;
-    var iterateeBindStubResult = function iterateeBindResult() {};
+    let MapEach;
+    let nextTickStub;
+    const inputArray = [1, 2, 3, 4, 5];
+    let iteratee;
+    let iterateeBindStub;
+    const iterateeBindStubResult = function iterateeBindResult() {};
 
-    var mapEachCallbackStub;
-    var mapEachCallbackBindStub;
-    var mapEachCallbackBindResult = function mapEachCallbackBindResult() {};
+    let mapEachCallbackStub;
+    let mapEachCallbackBindStub;
+    const mapEachCallbackBindResult = function mapEachCallbackBindResult() {};
 
     before(function() {
         MapEach = require('../../lib/map-each.js');
@@ -35,7 +35,7 @@ describe('map-each - unit tests', function() {
 
     describe('map-each - entry-point', function() {
 
-        var callback = function callback() {};
+        const callback = function callback() {};
 
         before(function() {
             mapEachCallbackStub = sinon.stub(MapEach, '_mapEachCallback');
@@ -53,19 +53,19 @@ describe('map-each - unit tests', function() {
 
         it('should bind the callback, input array, iteratee, index and accumulator to the mapEachCallback', function() {
             expect(mapEachCallbackBindStub.args[0]).eql([
-               null, callback, inputArray, iteratee, 0, []
+                null, callback, inputArray, iteratee, 0, []
             ]);
         });
 
         it('should bind the first element of the input array, and the bound callback to the iteratee', function() {
-             expect(iterateeBindStub.args[0]).to.eql([
-                 null, inputArray[0], mapEachCallbackBindResult
-             ]);
+            expect(iterateeBindStub.args[0]).to.eql([
+                null, inputArray[0], mapEachCallbackBindResult
+            ]);
         });
 
         it('should invoke provide the bound iteratee function to process.nextTick', function() {
             expect(nextTickStub.args[0]).to.eql([
-               iterateeBindStubResult
+                iterateeBindStubResult
             ]);
         });
 
@@ -75,9 +75,9 @@ describe('map-each - unit tests', function() {
     });
 
     describe('map-each - callback', function() {
-        var allDoneStub;
-        var allDoneBindStub;
-        var allDoneBindResult = function allDoneBound() {};
+        let allDoneStub;
+        let allDoneBindStub;
+        const allDoneBindResult = function allDoneBound() {};
 
         before(function() {
             allDoneStub = sinon.stub();
@@ -90,7 +90,7 @@ describe('map-each - unit tests', function() {
 
         describe('when invoked with an error', function() {
 
-            var expectedError = new Error('not making any promises');
+            const expectedError = new Error('not making any promises');
 
             beforeEach(function() {
                 MapEach._mapEachCallback(allDoneStub, inputArray, iteratee, 0, [], expectedError);

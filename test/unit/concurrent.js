@@ -1,17 +1,17 @@
 'use strict';
 
-var mockery = require('mockery');
-var sinon = require('sinon');
-var chai = require('chai');
-var expect = chai.expect;
+const mockery = require('mockery');
+const sinon = require('sinon');
+const chai = require('chai');
+const expect = chai.expect;
 chai.use(require('chai-things'));
 
 describe('concurrent - unit tests', function() {
-    var Concurrent;
-    var nextTickStub;
-    var callbackSpy;
-    var callbackSpyBindStub;
-    var boundCallbackSpy = function boundCallbackSpy() {};
+    let Concurrent;
+    let nextTickStub;
+    let callbackSpy;
+    let callbackSpyBindStub;
+    const boundCallbackSpy = function boundCallbackSpy() {};
 
     before(function() {
         nextTickStub = sinon.stub(process, 'nextTick');
@@ -30,8 +30,8 @@ describe('concurrent - unit tests', function() {
     });
 
     describe('concurrent - entry point', function() {
-        var invokeConcurrentlySpy;
-        var inputFunctions = [function one() {}, function two() {}];
+        let invokeConcurrentlySpy;
+        const inputFunctions = [function one() {}, function two() {}];
 
         before(function() {
             mockery.enable({
@@ -70,16 +70,16 @@ describe('concurrent - unit tests', function() {
         });
 
         describe('on first invocation with an error with an error', function() {
-            var syncState;
-            var error = new Error('it rained today');
+            let syncState;
+            const error = new Error('it rained today');
 
             beforeEach(function() {
                 syncState = {
                     numToDo: 10,
                     numComplete: 3,
-                    results: [4,3,2]
+                    results: [4, 3, 2]
                 };
-                var boundCallback = Concurrent._concurrentCallback.bind(syncState);
+                const boundCallback = Concurrent._concurrentCallback.bind(syncState);
                 boundCallback(3, callbackSpy, error, 'should be ignored because there is an error');
             });
 
@@ -103,24 +103,24 @@ describe('concurrent - unit tests', function() {
                 expect(syncState).to.eql({
                     numToDo: 10,
                     numComplete: 3,
-                    results: [4,3,2],
+                    results: [4, 3, 2],
                     error: error
                 });
             });
         });
 
         describe('on n+1 invocation with an error', function() {
-            var syncState;
-            var error = new Error('this error is new');
+            let syncState;
+            const error = new Error('this error is new');
 
             beforeEach(function() {
                 syncState = {
                     numToDo: 10,
                     numComplete: 3,
-                    results: [4,3,2],
+                    results: [4, 3, 2],
                     error: new Error('previously recorded')
                 };
-                var boundCallback = Concurrent._concurrentCallback.bind(syncState);
+                const boundCallback = Concurrent._concurrentCallback.bind(syncState);
                 boundCallback(3, callbackSpy, error, 'should be ignored because there is an error');
             });
 
@@ -132,14 +132,14 @@ describe('concurrent - unit tests', function() {
                 expect(syncState).to.eql({
                     numToDo: 10,
                     numComplete: 3,
-                    results: [4,3,2],
+                    results: [4, 3, 2],
                     error: new Error('previously recorded')
                 });
             });
         });
 
         describe('invocations without error', function() {
-            var testParams;
+            let testParams;
             beforeEach(function() {
                 testParams = {
                     syncState: {
@@ -151,7 +151,7 @@ describe('concurrent - unit tests', function() {
                     result: 'this is result'
                 };
 
-                var boundCallback = Concurrent._concurrentCallback.bind(testParams.syncState);
+                const boundCallback = Concurrent._concurrentCallback.bind(testParams.syncState);
                 boundCallback(testParams.index, callbackSpy, null, testParams.result);
             });
 
@@ -160,12 +160,12 @@ describe('concurrent - unit tests', function() {
             });
 
             it('should update the syncState result at the index position', function() {
-                expect(testParams.syncState.results).to.eql([4, 2, ,'this is result']);
+                expect(testParams.syncState.results).to.eql([4, 2, , 'this is result']);
             });
         });
 
         describe('final invocations all without errors', function() {
-            var testParams;
+            let testParams;
             beforeEach(function() {
                 testParams = {
                     syncState: {
@@ -177,7 +177,7 @@ describe('concurrent - unit tests', function() {
                     result: 'this is result'
                 };
 
-                var boundCallback = Concurrent._concurrentCallback.bind(testParams.syncState);
+                const boundCallback = Concurrent._concurrentCallback.bind(testParams.syncState);
                 boundCallback(testParams.index, callbackSpy, null, testParams.result);
             });
 
