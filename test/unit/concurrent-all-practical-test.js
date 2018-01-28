@@ -1,5 +1,6 @@
 'use strict';
 
+const mockery = require('mockery');
 const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
@@ -7,67 +8,75 @@ const expect = chai.expect;
 describe('concurrent-all - practical tests', function() {
     this.timeout(10000);
 
-    function taskOfRandomDuration(taskId, callback) {
-        setTimeout(function() {
-            if (taskId % 2 === 0) {
-                callback(null, `even tasks should succeed ${taskId}`);
-            } else {
-                callback(new Error(`odd tasks should fail ${taskId}`));
+    describe('some tasks fail, some tasks succeed', function() {
+        const callbackSpy = sinon.spy();
+        let concurrentTasks;
+
+        before('setup tasks to perform concurrently', function() {
+
+            function taskOfRandomDuration(taskId, callback) {
+                setTimeout(function() {
+                    if (taskId % 2 === 0) {
+                        callback(null, `even tasks should succeed ${taskId}`);
+                    } else {
+                        callback(`odd tasks should fail ${taskId}`);
+                    }
+
+                }, Math.floor((Math.random() * 500) + 50));
             }
 
-        }, Math.floor((Math.random() * 500) + 50));
-    }
-
-    let numTasksToRun;
-    let tasks;
-    let expectedResult;
-    let expectedNumErrors;
-    let ConcurrentAll;
-
-    before('setup variables', function() {
-        numTasksToRun = 10;
-        ConcurrentAll = require('../../lib/concurrent-all.js');
-    });
-
-    describe('some tasks fail, some tasks pass', function() {
-
-        before('setup input functions', function() {
-            tasks = [];
-            for (let i = 0; i < numTasksToRun; i++) {
+            concurrentTasks = [];
+            for (let i = 0; i < 4; i++) {
                 const spy = sinon.spy(taskOfRandomDuration.bind(null, i));
-                tasks.push(spy);
+                concurrentTasks.push(spy);
             }
         });
 
-        before('setup expected result data', function() {
-            expectedNumErrors = numTasksToRun / 2;
-            expectedResult = [];
-            for (let i = 0; i < numTasksToRun; ++i) {
-                if (i % 2 === 0) {
-                    expectedResult.push({error: null, result: `even tasks should succeed ${i}`});
-                } else {
-                    expectedResult.push({error: new Error(`odd tasks should fail ${i}`), result: null});
-                }
-            }
-        });
-
-        let error;
-        let result;
         before('run test', function(done) {
-            ConcurrentAll.concurrentAll(tasks, function(err, res) {
-                error = err;
-                result = res;
+            mockery.enable({useCleanCache: true, warnOnUnregistered: false});
+
+            const ConcurrentAll = require('../../lib/concurrent-all.js');
+            ConcurrentAll.concurrentAll(concurrentTasks, (error, result) => {
+                callbackSpy(error, result);
                 done();
             });
         });
 
-        it('should produce the expected error count', function() {
-            expect(error).to.equal(numTasksToRun / 2);
+        after(function() {
+            mockery.disable();
         });
 
-        it('should produce the expected result data', function() {
-            expect(result).to.eql(expectedResult);
+        it(`should call the callback with an error count and the expected results array, containing an element for 
+        concurrent task with two properties set appropriately containing the error or result of the task`, function() {
+            const expectedErrorCount = 2;
+            const expectedResultsArray = [
+                {
+                    error: null,
+                    result: 'even tasks should succeed 0'
+                },
+                {
+                    error: 'odd tasks should fail 1',
+                    result: null
+                },
+                {
+                    error: null,
+                    result: 'even tasks should succeed 2'
+                },
+                {
+                    error: 'odd tasks should fail 3',
+                    result: null
+                }
+            ];
+
+            expect(callbackSpy.args).to.eql([
+                [expectedErrorCount, expectedResultsArray]
+            ]);
+        });
+
+        it('should have called all functions despite errors having occurred', function() {
+            const spyCallCounts = concurrentTasks.map((task) => task.callCount);
+
+            expect(spyCallCounts).to.eql([1, 1, 1, 1]);
         });
     });
-
 });
