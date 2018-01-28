@@ -1,5 +1,6 @@
 'use strict';
 
+const mockery = require('mockery');
 const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
@@ -7,66 +8,96 @@ const expect = chai.expect;
 describe('map-concurrent-all - practical tests', function() {
     this.timeout(10000);
 
-    function iteratee(numberToTest, callback) {
-        setTimeout(function() {
-            if (numberToTest % 2 === 0) {
-                callback(null, `even numbers should succeed ${numberToTest}`);
-            } else {
-                callback(new Error(`odd odd should fail ${numberToTest}`));
-            }
+    describe('some tasks fail, some tasks succeed', function() {
+        let itemsToMap;
+        let callbackSpy;
+        let taskSpy;
 
-        }, Math.floor((Math.random() * 500) + 50));
-    }
-
-    let numInputItems;
-    let input;
-    let expectedResult;
-    let expectedNumErrors;
-    let MapConcurrentAll;
-
-    before('setup variables', function() {
-        numInputItems = 10;
-        MapConcurrentAll = require('../../lib/map-concurrent-all.js');
-    });
-
-    describe('some tasks fail, some tasks pass', function() {
-
-        before('setup input', function() {
-            input = [];
-            for (let i = 0; i < numInputItems; i++) {
-                input.push(i);
-            }
-        });
-
-        before('setup expected result data', function() {
-            expectedNumErrors = numInputItems / 2;
-            expectedResult = [];
-            for (let i = 0; i < numInputItems; ++i) {
-                if (i % 2 === 0) {
-                    expectedResult.push({error: null, result: `even numbers should succeed ${i}`});
+        function taskOfRandomDuration(taskId, callback) {
+            setTimeout(function() {
+                if (taskId % 2 === 0) {
+                    callback(null, `even tasks should succeed ${taskId}`);
                 } else {
-                    expectedResult.push({error: new Error(`odd numbers should fail ${i}`), result: null});
+                    callback(`odd tasks should fail ${taskId}`);
                 }
-            }
-        });
 
-        let error;
-        let result;
+            }, Math.floor((Math.random() * 500) + 50));
+        }
+
         before('run test', function(done) {
-            MapConcurrentAll.mapConcurrentAll(input, iteratee, function(err, res) {
-                error = err;
-                result = res;
-                done();
-            });
+            mockery.enable({useCleanCache: true, warnOnUnregistered: false});
+
+            itemsToMap = [];
+            for (let i = 0; i < 4; i++) {
+                itemsToMap.push(i);
+            }
+
+            const MapConcurrentAll = require('../../lib/map-concurrent-all.js');
+            MapConcurrentAll.mapConcurrentAll(itemsToMap, taskSpy = sinon.spy(taskOfRandomDuration), callbackSpy = sinon.spy(() => done()));
         });
 
-        it('should produce the expected error count', function() {
-            expect(error).to.equal(numInputItems / 2);
+        after(function() {
+            mockery.disable();
         });
 
-        it('should produce the expected result data', function() {
-            expect(result).to.eql(expectedResult);
+        it(`should call the callback with an error count and the expected results array, containing an element for 
+        concurrent task with two properties set appropriately containing the error or result of the task`, function() {
+            const expectedErrorCount = 2;
+            const expectedResultsArray = [
+                {
+                    error: null,
+                    result: 'even tasks should succeed 0'
+                },
+                {
+                    error: 'odd tasks should fail 1',
+                    result: null
+                },
+                {
+                    error: null,
+                    result: 'even tasks should succeed 2'
+                },
+                {
+                    error: 'odd tasks should fail 3',
+                    result: null
+                }
+            ];
+
+            expect(callbackSpy.args).to.eql([
+                [expectedErrorCount, expectedResultsArray]
+            ]);
+        });
+
+        it('should have called all functions despite errors having occurred', function() {
+            expect(taskSpy.callCount).to.equal(4);
         });
     });
 
+    describe('positive practical tests - empty input', function() {
+        let callbackSpy;
+        let taskSpy;
+
+        before('run test', function(done) {
+            mockery.enable({useCleanCache: true, warnOnUnregistered: false});
+
+            const MapConcurrentAll = require('../../lib/map-concurrent-all.js');
+            MapConcurrentAll.mapConcurrentAll([], taskSpy = sinon.spy(), callbackSpy = sinon.spy(() => done()));
+        });
+
+        after(function(){
+            mockery.disable();
+        });
+
+        it('should call the callback with an error count and an empty array for the result', function() {
+            const expectedError = null;
+            const expectedResultsArray = [];
+
+            expect(callbackSpy.args).to.eql([
+                [expectedError, expectedResultsArray]
+            ]);
+        });
+
+        it('should not call the task', function() {
+            expect(taskSpy.callCount).to.equal(0);
+        });
+    });
 });
