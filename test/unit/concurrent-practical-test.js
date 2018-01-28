@@ -1,5 +1,6 @@
 'use strict';
 
+const mockery = require('mockery');
 const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
@@ -8,89 +9,84 @@ chai.use(require('chai-things'));
 describe('concurrent - practical test', function() {
     this.timeout(10000);
 
-    let numTasksToRun;
-    let tasks;
-    let expectedResult;
-    let Concurrent;
-
-    function taskOfRandomDuration(taskId, callback) {
+    function successfulTaskOfRandomDuration(taskId, callback) {
         setTimeout(function() {
             callback(null, `i am task ${taskId}`);
         }, Math.floor((Math.random() * 1500) + 150));
     }
 
-    before('setup variables', function() {
-        numTasksToRun = 10;
-        Concurrent = require('../../lib/concurrent.js');
-    });
-
     describe('positive practical tests', function() {
+        let callbackSpy;
+        let concurrentTasks;
 
-        before('setup input functions', function() {
-            tasks = [];
-            for (let i = 0; i < 10; i++) {
-                const spy = sinon.spy(taskOfRandomDuration.bind(null, i));
-                tasks.push(spy);
+        before('setup tasks to perform concurrently', function() {
+            concurrentTasks = [];
+            for (let i = 0; i < 4; i++) {
+                const spy = sinon.spy(successfulTaskOfRandomDuration.bind(null, i));
+                concurrentTasks.push(spy);
             }
         });
 
-        before('setup expected result data', function() {
-            expectedResult = [];
-            for (let i = 0; i < 10; ++i) {
-                expectedResult.push(`i am task ${i}`);
-            }
-        });
-
-        let error;
-        let result;
         before('run test', function(done) {
-            Concurrent.concurrent(tasks, function(err, res) {
-                error = err;
-                result = res;
-                done();
-            });
+            mockery.enable({useCleanCache: true, warnOnUnregistered: false});
+
+            const Concurrent = require('../../lib/concurrent.js');
+            Concurrent.concurrent(concurrentTasks, callbackSpy = sinon.spy(() => done()));
         });
 
-        it('should call back with the expected response when all functions have responded', function() {
-            expect(result).to.eql(expectedResult);
+        after(function(){
+            mockery.disable();
         });
 
-        it('should call all of the functions once', function() {
-            const expectedCallCount = tasks.map(function(spy) {
-                return spy.callCount;
-            });
-            expect(expectedCallCount).to.all.equal(1);
+        it(`should call the callback with an error count and the expected results array, containing an element 
+        with the result of each concurrent task`, function() {
+            const expectedError = null;
+            const expectedResultsArray = [
+                "i am task 0",
+                "i am task 1",
+                "i am task 2",
+                "i am task 3"
+            ];
+
+            expect(callbackSpy.args).to.eql([
+                [expectedError, expectedResultsArray]
+            ]);
+        });
+
+        it('should have called all functions despite errors having occurred', function() {
+            const spyCallCounts = concurrentTasks.map((task) => task.callCount);
+
+            expect(spyCallCounts).to.eql([1, 1, 1, 1]);
         });
     });
 
     describe('positive practical tests - empty input', function() {
+        let callbackSpy;
 
-        before('setup input functions', function() {
-            tasks = [];
-        });
-
-        before('setup expected result data', function() {
-            expectedResult = [];
-        });
-
-        let error;
-        let result;
         before('run test', function(done) {
-            Concurrent.concurrent(tasks, function(err, res) {
-                error = err;
-                result = res;
-                done();
-            });
+            mockery.enable({useCleanCache: true, warnOnUnregistered: false});
+
+            const Concurrent = require('../../lib/concurrent.js');
+            Concurrent.concurrent([], callbackSpy = sinon.spy(() => done()));
         });
 
-        it('should call back with the expected response when all functions have responded', function() {
-            expect(result).to.eql(expectedResult);
+        after(function(){
+            mockery.disable();
+        });
+
+        it('should call the callback with an error count and an empty array for the result', function() {
+            const expectedError = null;
+            const expectedResultsArray = [];
+
+            expect(callbackSpy.args).to.eql([
+                [expectedError, expectedResultsArray]
+            ]);
         });
     });
 
     describe('one function calling back with error', function() {
-
-        const expectedError = new Error('we could not do it all');
+        let concurrentTasks;
+        let callbackSpy;
 
         function callbackSuccessImmediately(taskId, callback) {
             setTimeout(function() {
@@ -100,12 +96,14 @@ describe('concurrent - practical test', function() {
 
         function callbackErrorImmediately(taskId, callback) {
             setTimeout(function() {
-                callback(expectedError);
+                callback('we could not do it all');
             }, taskId * 100);
         }
 
-        before('setup input functions', function() {
-            tasks = [
+        before('run test', function(done) {
+            mockery.enable({useCleanCache: true, warnOnUnregistered: false});
+
+            concurrentTasks = [
                 callbackSuccessImmediately.bind(null, 1),
                 callbackSuccessImmediately.bind(null, 2),
                 callbackSuccessImmediately.bind(null, 3),
@@ -114,27 +112,15 @@ describe('concurrent - practical test', function() {
                 callbackSuccessImmediately.bind(null, 6),
                 callbackSuccessImmediately.bind(null, 7)
             ];
-        });
 
-        let error;
-        let result;
-        let callbackSpy;
-        before('run test', function(done) {
-            function callback(err, res) {
-                error = err;
-                result = res;
-                done();
-            }
-
-            Concurrent.concurrent(tasks, callbackSpy = sinon.spy(callback));
+            const Concurrent = require('../../lib/concurrent.js');
+            Concurrent.concurrent(concurrentTasks, callbackSpy = sinon.spy(() => done()));
         });
 
         it('should callback with an error if one of the tasks calls back with error', function() {
-            expect(error).to.eql(expectedError);
-        });
-
-        it('should not provide an undefined result', function() {
-            expect(result).to.equal(undefined);
+            expect(callbackSpy.args).to.eql([
+                ['we could not do it all']
+            ]);
         });
 
         it('should invoke the callback only once', function() {

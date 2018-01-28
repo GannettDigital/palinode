@@ -9,7 +9,7 @@ describe('concurrent-all - practical tests', function() {
     this.timeout(10000);
 
     describe('some tasks fail, some tasks succeed', function() {
-        const callbackSpy = sinon.spy();
+        let callbackSpy;
         let concurrentTasks;
 
         before('setup tasks to perform concurrently', function() {
@@ -36,10 +36,7 @@ describe('concurrent-all - practical tests', function() {
             mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
             const ConcurrentAll = require('../../lib/concurrent-all.js');
-            ConcurrentAll.concurrentAll(concurrentTasks, (error, result) => {
-                callbackSpy(error, result);
-                done();
-            });
+            ConcurrentAll.concurrentAll(concurrentTasks, callbackSpy = sinon.spy(() => done()));
         });
 
         after(function() {
@@ -77,6 +74,30 @@ describe('concurrent-all - practical tests', function() {
             const spyCallCounts = concurrentTasks.map((task) => task.callCount);
 
             expect(spyCallCounts).to.eql([1, 1, 1, 1]);
+        });
+    });
+
+    describe('positive practical tests - empty input', function() {
+        let callbackSpy;
+
+        before('run test', function(done) {
+            mockery.enable({useCleanCache: true, warnOnUnregistered: false});
+
+            const ConcurrentAll = require('../../lib/concurrent-all.js');
+            ConcurrentAll.concurrentAll([], callbackSpy = sinon.spy(() => done()));
+        });
+
+        after(function(){
+            mockery.disable();
+        });
+
+        it('should call the callback with an error count and an empty array for the result', function() {
+            const expectedError = null;
+            const expectedResultsArray = [];
+
+            expect(callbackSpy.args).to.eql([
+                [expectedError, expectedResultsArray]
+            ]);
         });
     });
 });
