@@ -34,7 +34,7 @@ describe('concurrent - practical test', function() {
             Concurrent.concurrent(concurrentTasks, callbackSpy = sinon.spy(() => done()));
         });
 
-        after(function(){
+        after(function() {
             mockery.disable();
         });
 
@@ -42,10 +42,10 @@ describe('concurrent - practical test', function() {
         with the result of each concurrent task`, function() {
             const expectedError = null;
             const expectedResultsArray = [
-                "i am task 0",
-                "i am task 1",
-                "i am task 2",
-                "i am task 3"
+                'i am task 0',
+                'i am task 1',
+                'i am task 2',
+                'i am task 3'
             ];
 
             expect(callbackSpy.args).to.eql([
@@ -70,7 +70,7 @@ describe('concurrent - practical test', function() {
             Concurrent.concurrent([], callbackSpy = sinon.spy(() => done()));
         });
 
-        after(function(){
+        after(function() {
             mockery.disable();
         });
 

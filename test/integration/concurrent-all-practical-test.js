@@ -5,35 +5,38 @@ const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
 
-describe('map-concurrent-all - practical tests', function() {
+describe('concurrent-all - practical tests', function() {
     this.timeout(10000);
 
     describe('some tasks fail, some tasks succeed', function() {
-        let itemsToMap;
         let callbackSpy;
-        let taskSpy;
+        let concurrentTasks;
 
-        function taskOfRandomDuration(taskId, callback) {
-            setTimeout(function() {
-                if (taskId % 2 === 0) {
-                    callback(null, `even tasks should succeed ${taskId}`);
-                } else {
-                    callback(`odd tasks should fail ${taskId}`);
-                }
+        before('setup tasks to perform concurrently', function() {
 
-            }, Math.floor((Math.random() * 500) + 50));
-        }
+            function taskOfRandomDuration(taskId, callback) {
+                setTimeout(function() {
+                    if (taskId % 2 === 0) {
+                        callback(null, `even tasks should succeed ${taskId}`);
+                    } else {
+                        callback(`odd tasks should fail ${taskId}`);
+                    }
+
+                }, Math.floor((Math.random() * 500) + 50));
+            }
+
+            concurrentTasks = [];
+            for (let i = 0; i < 4; i++) {
+                const spy = sinon.spy(taskOfRandomDuration.bind(null, i));
+                concurrentTasks.push(spy);
+            }
+        });
 
         before('run test', function(done) {
             mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
-            itemsToMap = [];
-            for (let i = 0; i < 4; i++) {
-                itemsToMap.push(i);
-            }
-
-            const MapConcurrentAll = require('../../lib/map-concurrent-all.js');
-            MapConcurrentAll.mapConcurrentAll(itemsToMap, taskSpy = sinon.spy(taskOfRandomDuration), callbackSpy = sinon.spy(() => done()));
+            const ConcurrentAll = require('../../lib/concurrent-all.js');
+            ConcurrentAll.concurrentAll(concurrentTasks, callbackSpy = sinon.spy(() => done()));
         });
 
         after(function() {
@@ -68,22 +71,23 @@ describe('map-concurrent-all - practical tests', function() {
         });
 
         it('should have called all functions despite errors having occurred', function() {
-            expect(taskSpy.callCount).to.equal(4);
+            const spyCallCounts = concurrentTasks.map((task) => task.callCount);
+
+            expect(spyCallCounts).to.eql([1, 1, 1, 1]);
         });
     });
 
     describe('positive practical tests - empty input', function() {
         let callbackSpy;
-        let taskSpy;
 
         before('run test', function(done) {
             mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
-            const MapConcurrentAll = require('../../lib/map-concurrent-all.js');
-            MapConcurrentAll.mapConcurrentAll([], taskSpy = sinon.spy(), callbackSpy = sinon.spy(() => done()));
+            const ConcurrentAll = require('../../lib/concurrent-all.js');
+            ConcurrentAll.concurrentAll([], callbackSpy = sinon.spy(() => done()));
         });
 
-        after(function(){
+        after(function() {
             mockery.disable();
         });
 
@@ -94,10 +98,6 @@ describe('map-concurrent-all - practical tests', function() {
             expect(callbackSpy.args).to.eql([
                 [expectedError, expectedResultsArray]
             ]);
-        });
-
-        it('should not call the task', function() {
-            expect(taskSpy.callCount).to.equal(0);
         });
     });
 });
