@@ -4,7 +4,7 @@ const mockery = require('mockery');
 const expect = require('chai').expect;
 const sinon = require('sinon');
 
-describe('series - practical test', function() {
+describe('series', function() {
 
     describe('task in the middle fails, each passing a parameter to the next', function() {
         function task0(callback) {

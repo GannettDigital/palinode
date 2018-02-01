@@ -6,7 +6,7 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-things'));
 
-describe('map-concurrent - practical test', function() {
+describe('map-concurrent', function() {
     this.timeout(10000);
 
     function squareWithDelay(input, callback) {

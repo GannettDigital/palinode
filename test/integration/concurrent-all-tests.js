@@ -5,7 +5,7 @@ const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
 
-describe('concurrent-all - practical tests', function() {
+describe('concurrent-all', function() {
     this.timeout(10000);
 
     describe('some tasks fail, some tasks succeed', function() {
@@ -75,6 +75,10 @@ describe('concurrent-all - practical tests', function() {
 
             expect(spyCallCounts).to.eql([1, 1, 1, 1]);
         });
+
+        it('should call each function with a callback', function() {
+            expect(con)
+        })
     });
 
     describe('input is an empty array', function() {

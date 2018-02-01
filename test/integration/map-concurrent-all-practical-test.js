@@ -5,7 +5,7 @@ const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
 
-describe('map-concurrent-all - practical tests', function() {
+describe('map-concurrent-all', function() {
     this.timeout(10000);
 
     describe('some tasks fail, some tasks succeed', function() {

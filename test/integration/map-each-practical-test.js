@@ -4,7 +4,7 @@ const mockery = require('mockery');
 const expect = require('chai').expect;
 const sinon = require('sinon');
 
-describe('map-each - practical test', function() {
+describe('map-each', function() {
 
 
     describe('all tasks succeed', function() {

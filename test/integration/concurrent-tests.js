@@ -6,7 +6,7 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-things'));
 
-describe('concurrent - practical test', function() {
+describe('concurrent', function() {
     this.timeout(10000);
 
     function successfulTaskOfRandomDuration(taskId, callback) {
@@ -15,7 +15,7 @@ describe('concurrent - practical test', function() {
         }, Math.floor((Math.random() * 1500) + 150));
     }
 
-    describe('positive practical tests', function() {
+    describe('all tasks are sucessful', function() {
         let callbackSpy;
         let concurrentTasks;
 
@@ -60,7 +60,7 @@ describe('concurrent - practical test', function() {
         });
     });
 
-    describe('positive practical tests - empty input', function() {
+    describe('empty input', function() {
         let callbackSpy;
 
         before('run test', function(done) {
@@ -84,7 +84,7 @@ describe('concurrent - practical test', function() {
         });
     });
 
-    describe('one function calling back with error', function() {
+    describe('one task calling back with error', function() {
         let concurrentTasks;
         let callbackSpy;
 
