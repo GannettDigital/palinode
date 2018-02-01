@@ -15,7 +15,7 @@ describe('map-concurrent - practical test', function() {
         }, Math.floor((Math.random() * 1500) + 150));
     }
 
-    describe('positive practical tests', function() {
+    describe('all tasks succeed', function() {
         let callbackSpy;
         let iterateeSpy;
 
@@ -61,7 +61,7 @@ describe('map-concurrent - practical test', function() {
         });
     });
 
-    describe('positive practical tests - empty input', function() {
+    describe('input is an empty array', function() {
         let callbackSpy;
         let taskSpy;
 
@@ -76,7 +76,7 @@ describe('map-concurrent - practical test', function() {
             mockery.disable();
         });
 
-        it('should call the callback with an error count and an empty array for the result', function() {
+        it('should call the callback with null error and an empty array for the result', function() {
             const expectedError = null;
             const expectedResultsArray = [];
 
@@ -90,7 +90,7 @@ describe('map-concurrent - practical test', function() {
         });
     });
 
-    describe('one function calling back with error', function() {
+    describe('one function calls back with error', function() {
         let callbackSpy;
 
         function asyncTaskToDo(taskId, callback) {

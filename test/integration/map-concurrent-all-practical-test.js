@@ -66,7 +66,7 @@ describe('map-concurrent-all - practical tests', function() {
         });
     });
 
-    describe('positive practical tests - empty input', function() {
+    describe('input is an empty array', function() {
         let callbackSpy;
         let taskSpy;
 
@@ -81,7 +81,7 @@ describe('map-concurrent-all - practical tests', function() {
             mockery.disable();
         });
 
-        it('should call the callback with an error count and an empty array for the result', function() {
+        it('should call the callback with null error and an empty array for the result', function() {
             const expectedError = null;
             const expectedResultsArray = [];
 
