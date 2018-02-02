@@ -59,11 +59,11 @@ describe('series', function() {
             expect(tasks[0].calledBefore(tasks[1])).to.equal(true);
         });
 
-        it('should call task1 before task2', function(){
+        it('should call task1 before task2', function() {
             expect(tasks[1].calledBefore(tasks[2])).to.equal(true);
         });
 
-        it('should call task1 before the callback', function(){
+        it('should call task1 before the callback', function() {
             expect(tasks[1].calledBefore(callbackSpy)).to.equal(true);
         });
 
@@ -127,11 +127,11 @@ describe('series', function() {
             expect(tasks[0].calledBefore(tasks[1])).to.equal(true);
         });
 
-        it('should call task1 before task2', function(){
+        it('should call task1 before task2', function() {
             expect(tasks[1].calledBefore(tasks[2])).to.equal(true);
         });
 
-        it('should call task2 before the callback', function(){
+        it('should call task2 before the callback', function() {
             expect(tasks[2].calledBefore(callbackSpy)).to.equal(true);
         });
 

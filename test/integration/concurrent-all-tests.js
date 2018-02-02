@@ -8,33 +8,27 @@ const expect = chai.expect;
 describe('concurrent-all', function() {
     this.timeout(10000);
 
+    function taskOfRandomDuration(taskId, callback) {
+        setTimeout(function() {
+            if (taskId % 2 === 0) {
+                callback(null, `even tasks should succeed ${taskId}`);
+            } else {
+                callback(`odd tasks should fail ${taskId}`);
+            }
+
+        }, Math.floor((Math.random() * 1000) + 50));
+    }
+
     describe('some tasks fail, some tasks succeed', function() {
         let callbackSpy;
-        let concurrentTasks;
-
-        before('setup tasks to perform concurrently', function() {
-
-            function taskOfRandomDuration(taskId, callback) {
-                setTimeout(function() {
-                    if (taskId % 2 === 0) {
-                        callback(null, `even tasks should succeed ${taskId}`);
-                    } else {
-                        callback(`odd tasks should fail ${taskId}`);
-                    }
-
-                }, Math.floor((Math.random() * 500) + 50));
-            }
-
-            concurrentTasks = [];
-            for (let i = 0; i < 4; i++) {
-                const spy = sinon.spy(taskOfRandomDuration.bind(null, i));
-                concurrentTasks.push(spy);
-            }
-        });
+        let taskSpy;
 
         before('run test', function(done) {
             mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
+            taskSpy = sinon.spy(taskOfRandomDuration);
+
+            const concurrentTasks = [0, 1, 2, 3].map((number) => taskSpy.bind(null, number));
             const ConcurrentAll = require('../../lib/concurrent-all.js');
             ConcurrentAll.concurrentAll(concurrentTasks, callbackSpy = sinon.spy(() => done()));
         });
@@ -71,14 +65,12 @@ describe('concurrent-all', function() {
         });
 
         it('should have called all functions despite errors having occurred', function() {
-            const spyCallCounts = concurrentTasks.map((task) => task.callCount);
-
-            expect(spyCallCounts).to.eql([1, 1, 1, 1]);
+            expect(taskSpy.callCount).to.eql(4);
         });
 
-        it('should call each function with a callback', function() {
-            expect(con)
-        })
+        it('should call the iteratee with an integer input value and a callback function', function() {
+            expect(taskSpy.alwaysCalledWith(sinon.match.number, sinon.match.func)).to.equal(true);
+        });
     });
 
     describe('input is an empty array', function() {

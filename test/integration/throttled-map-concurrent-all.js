@@ -5,7 +5,7 @@ const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
 
-describe('throttled-concurrent-all', function() {
+describe('throttled-map-concurrent-all', function() {
     this.timeout(10000);
 
     function taskOfRandomDuration(taskId, callback) {
@@ -22,21 +22,18 @@ describe('throttled-concurrent-all', function() {
     describe('when numWorkers is set greater than input length', function() {
         describe('some tasks fail, some tasks succeed', function() {
             let callbackSpy;
-            let concurrentTasks;
-
-            before('setup tasks to perform concurrently', function() {
-                concurrentTasks = [];
-                for (let i = 0; i < 6; i++) {
-                    const spy = sinon.spy(taskOfRandomDuration.bind(null, i));
-                    concurrentTasks.push(spy);
-                }
-            });
+            let iterateeSpy;
 
             before('run test', function(done) {
                 mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
-                const ThrottledConcurrentAll = require('../../lib/throttled-concurrent-all.js');
-                ThrottledConcurrentAll.throttledConcurrentAll(concurrentTasks, 21, callbackSpy = sinon.spy(() => done()));
+                const ThrottledMapConcurrentAll = require('../../lib/throttled-map-concurrent-all.js');
+                ThrottledMapConcurrentAll.throttledMapConcurrentAll(
+                    [0, 1, 2, 3, 4, 5],
+                    iterateeSpy = sinon.spy(taskOfRandomDuration),
+                    12,
+                    callbackSpy = sinon.spy(() => done())
+                );
             });
 
             after(function() {
@@ -78,21 +75,29 @@ describe('throttled-concurrent-all', function() {
                 ]);
             });
 
-            it('should have called all functions despite errors having occurred', function() {
-                const spyCallCounts = concurrentTasks.map((task) => task.callCount);
+            it('should call the iteratee once for each item', function() {
+                expect(iterateeSpy.callCount).to.equal(6);
+            });
 
-                expect(spyCallCounts).to.eql([1, 1, 1, 1, 1, 1]);
+            it('should call the iteratee with an integer input value and a callback function', function() {
+                expect(iterateeSpy.alwaysCalledWith(sinon.match.number, sinon.match.func)).to.equal(true);
             });
         });
 
         describe('empty input', function() {
             let callbackSpy;
+            let iterateeSpy;
 
             before('run test', function(done) {
                 mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
-                const ThrottledConcurrentAll = require('../../lib/throttled-concurrent-all.js');
-                ThrottledConcurrentAll.throttledConcurrentAll([], 21, callbackSpy = sinon.spy(() => done()));
+                const ThrottledMapConcurrentAll = require('../../lib/throttled-map-concurrent-all.js');
+                ThrottledMapConcurrentAll.throttledMapConcurrentAll(
+                    [],
+                    iterateeSpy = sinon.spy(taskOfRandomDuration),
+                    12,
+                    callbackSpy = sinon.spy(() => done())
+                );
             });
 
             after(function() {
@@ -106,6 +111,10 @@ describe('throttled-concurrent-all', function() {
                 expect(callbackSpy.args).to.eql([
                     [expectedError, expectedResultsArray]
                 ]);
+            });
+
+            it('should not call the iteratee', function() {
+                expect(iterateeSpy.notCalled).to.equal(true);
             });
         });
     });
@@ -113,21 +122,18 @@ describe('throttled-concurrent-all', function() {
     describe('when numWorkers is set less than input length', function() {
         describe('some tasks fail, some tasks succeed', function() {
             let callbackSpy;
-            let concurrentTasks;
-
-            before('setup tasks to perform concurrently', function() {
-                concurrentTasks = [];
-                for (let i = 0; i < 6; i++) {
-                    const spy = sinon.spy(taskOfRandomDuration.bind(null, i));
-                    concurrentTasks.push(spy);
-                }
-            });
+            let iterateeSpy;
 
             before('run test', function(done) {
                 mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
-                const ThrottledConcurrentAll = require('../../lib/throttled-concurrent-all.js');
-                ThrottledConcurrentAll.throttledConcurrentAll(concurrentTasks, 2, callbackSpy = sinon.spy(() => done()));
+                const ThrottledMapConcurrentAll = require('../../lib/throttled-map-concurrent-all.js');
+                ThrottledMapConcurrentAll.throttledMapConcurrentAll(
+                    [0, 1, 2, 3, 4, 5],
+                    iterateeSpy = sinon.spy(taskOfRandomDuration),
+                    2,
+                    callbackSpy = sinon.spy(() => done())
+                );
             });
 
             after(function() {
@@ -169,21 +175,29 @@ describe('throttled-concurrent-all', function() {
                 ]);
             });
 
-            it('should have called all functions despite errors having occurred', function() {
-                const spyCallCounts = concurrentTasks.map((task) => task.callCount);
+            it('should call the iteratee once for each item', function() {
+                expect(iterateeSpy.callCount).to.equal(6);
+            });
 
-                expect(spyCallCounts).to.eql([1, 1, 1, 1, 1, 1]);
+            it('should call the iteratee with an integer input value and a callback function', function() {
+                expect(iterateeSpy.alwaysCalledWith(sinon.match.number, sinon.match.func)).to.equal(true);
             });
         });
 
         describe('empty input', function() {
             let callbackSpy;
+            let iterateeSpy;
 
             before('run test', function(done) {
                 mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
-                const ThrottledConcurrentAll = require('../../lib/throttled-concurrent-all.js');
-                ThrottledConcurrentAll.throttledConcurrentAll([], 2, callbackSpy = sinon.spy(() => done()));
+                const ThrottledMapConcurrentAll = require('../../lib/throttled-map-concurrent-all.js');
+                ThrottledMapConcurrentAll.throttledMapConcurrentAll(
+                    [],
+                    iterateeSpy = sinon.spy(taskOfRandomDuration),
+                    2,
+                    callbackSpy = sinon.spy(() => done())
+                );
             });
 
             after(function() {
@@ -197,6 +211,10 @@ describe('throttled-concurrent-all', function() {
                 expect(callbackSpy.args).to.eql([
                     [expectedError, expectedResultsArray]
                 ]);
+            });
+
+            it('should not call the iteratee', function() {
+                expect(iterateeSpy.notCalled).to.equal(true);
             });
         });
     });
@@ -204,21 +222,17 @@ describe('throttled-concurrent-all', function() {
     describe('when numWorkers not set', function() {
         describe('some tasks fail, some tasks succeed', function() {
             let callbackSpy;
-            let concurrentTasks;
-
-            before('setup tasks to perform concurrently', function() {
-                concurrentTasks = [];
-                for (let i = 0; i < 6; i++) {
-                    const spy = sinon.spy(taskOfRandomDuration.bind(null, i));
-                    concurrentTasks.push(spy);
-                }
-            });
+            let iterateeSpy;
 
             before('run test', function(done) {
                 mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
-                const ThrottledConcurrentAll = require('../../lib/throttled-concurrent-all.js');
-                ThrottledConcurrentAll.throttledConcurrentAll(concurrentTasks, callbackSpy = sinon.spy(() => done()));
+                const ThrottledMapConcurrentAll = require('../../lib/throttled-map-concurrent-all.js');
+                ThrottledMapConcurrentAll.throttledMapConcurrentAll(
+                    [0, 1, 2, 3, 4, 5],
+                    iterateeSpy = sinon.spy(taskOfRandomDuration),
+                    callbackSpy = sinon.spy(() => done())
+                );
             });
 
             after(function() {
@@ -226,7 +240,7 @@ describe('throttled-concurrent-all', function() {
             });
 
             it(`should call the callback with an error count and the expected results array, containing an element for 
-        concurrent task with two properties set appropriately containing the error or result of the task`, function() {
+        each concurrent task with two properties set appropriately containing the error or result of the task`, function() {
                 const expectedErrorCount = 3;
                 const expectedResultsArray = [
                     {
@@ -260,21 +274,28 @@ describe('throttled-concurrent-all', function() {
                 ]);
             });
 
-            it('should have called all functions despite errors having occurred', function() {
-                const spyCallCounts = concurrentTasks.map((task) => task.callCount);
+            it('should call the iteratee once for each item', function() {
+                expect(iterateeSpy.callCount).to.equal(6);
+            });
 
-                expect(spyCallCounts).to.eql([1, 1, 1, 1, 1, 1]);
+            it('should call the iteratee with an integer input value and a callback function', function() {
+                expect(iterateeSpy.alwaysCalledWith(sinon.match.number, sinon.match.func)).to.equal(true);
             });
         });
 
         describe('empty input', function() {
             let callbackSpy;
+            let iterateeSpy;
 
             before('run test', function(done) {
                 mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
-                const ThrottledConcurrentAll = require('../../lib/throttled-concurrent-all.js');
-                ThrottledConcurrentAll.throttledConcurrentAll([], callbackSpy = sinon.spy(() => done()));
+                const ThrottledMapConcurrentAll = require('../../lib/throttled-map-concurrent-all.js');
+                ThrottledMapConcurrentAll.throttledMapConcurrentAll(
+                    [],
+                    iterateeSpy = sinon.spy(taskOfRandomDuration),
+                    callbackSpy = sinon.spy(() => done())
+                );
             });
 
             after(function() {
@@ -288,6 +309,10 @@ describe('throttled-concurrent-all', function() {
                 expect(callbackSpy.args).to.eql([
                     [expectedError, expectedResultsArray]
                 ]);
+            });
+
+            it('should not call the iteratee', function() {
+                expect(iterateeSpy.notCalled).to.equal(true);
             });
         });
     });

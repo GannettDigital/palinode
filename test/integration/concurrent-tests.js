@@ -9,27 +9,27 @@ chai.use(require('chai-things'));
 describe('concurrent', function() {
     this.timeout(10000);
 
-    function successfulTaskOfRandomDuration(taskId, callback) {
+    function taskOfRandomDuration(taskId, callback) {
         setTimeout(function() {
-            callback(null, `i am task ${taskId}`);
-        }, Math.floor((Math.random() * 1500) + 150));
+            if (taskId % 2 === 0) {
+                callback(null, `even tasks should succeed ${taskId}`);
+            } else {
+                callback(`odd tasks should fail ${taskId}`);
+            }
+
+        }, Math.floor((Math.random() * 1000) + 50));
     }
 
-    describe('all tasks are sucessful', function() {
+    describe('some tasks fail, some tasks succeed', function() {
         let callbackSpy;
-        let concurrentTasks;
-
-        before('setup tasks to perform concurrently', function() {
-            concurrentTasks = [];
-            for (let i = 0; i < 4; i++) {
-                const spy = sinon.spy(successfulTaskOfRandomDuration.bind(null, i));
-                concurrentTasks.push(spy);
-            }
-        });
+        let taskSpy;
 
         before('run test', function(done) {
             mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
+            taskSpy = sinon.spy(taskOfRandomDuration);
+
+            const concurrentTasks = [0, 2, 3, 4, 6].map((number) => taskSpy.bind(null, number));
             const Concurrent = require('../../lib/concurrent.js');
             Concurrent.concurrent(concurrentTasks, callbackSpy = sinon.spy(() => done()));
         });
@@ -38,25 +38,57 @@ describe('concurrent', function() {
             mockery.disable();
         });
 
-        it(`should call the callback with an error count and the expected results array, containing an element 
-        with the result of each concurrent task`, function() {
-            const expectedError = null;
-            const expectedResultsArray = [
-                'i am task 0',
-                'i am task 1',
-                'i am task 2',
-                'i am task 3'
-            ];
-
+        it('should call the callback with the first error that called back from the all the input functions', function() {
             expect(callbackSpy.args).to.eql([
-                [expectedError, expectedResultsArray]
+                ['odd tasks should fail 3']
             ]);
         });
 
         it('should have called all functions despite errors having occurred', function() {
-            const spyCallCounts = concurrentTasks.map((task) => task.callCount);
+            expect(taskSpy.callCount).to.eql(5);
+        });
 
-            expect(spyCallCounts).to.eql([1, 1, 1, 1]);
+        it('should call the iteratee with an integer input value and a callback function', function() {
+            expect(taskSpy.alwaysCalledWith(sinon.match.number, sinon.match.func)).to.equal(true);
+        });
+    });
+
+    describe('all tasks succeed', function() {
+        let callbackSpy;
+        let taskSpy;
+
+        before('run test', function(done) {
+            mockery.enable({useCleanCache: true, warnOnUnregistered: false});
+
+            taskSpy = sinon.spy(taskOfRandomDuration);
+
+            const concurrentTasks = [0, 2, 8, 4, 6].map((number) => taskSpy.bind(null, number));
+            const Concurrent = require('../../lib/concurrent.js');
+            Concurrent.concurrent(concurrentTasks, callbackSpy = sinon.spy(() => done()));
+        });
+
+        after(function() {
+            mockery.disable();
+        });
+
+        it('should call the callback with the first error that called back from the all the input functions', function() {
+            expect(callbackSpy.args).to.eql([
+                [null, [
+                    'even tasks should succeed 0',
+                    'even tasks should succeed 2',
+                    'even tasks should succeed 8',
+                    'even tasks should succeed 4',
+                    'even tasks should succeed 6'
+                ]]
+            ]);
+        });
+
+        it('should have called all functions despite errors having occurred', function() {
+            expect(taskSpy.callCount).to.eql(5);
+        });
+
+        it('should call the iteratee with an integer input value and a callback function', function() {
+            expect(taskSpy.alwaysCalledWith(sinon.match.number, sinon.match.func)).to.equal(true);
         });
     });
 
@@ -81,50 +113,6 @@ describe('concurrent', function() {
             expect(callbackSpy.args).to.eql([
                 [expectedError, expectedResultsArray]
             ]);
-        });
-    });
-
-    describe('one task calling back with error', function() {
-        let concurrentTasks;
-        let callbackSpy;
-
-        function callbackSuccessImmediately(taskId, callback) {
-            setTimeout(function() {
-                callback(null, taskId);
-            }, taskId * 100);
-        }
-
-        function callbackErrorImmediately(taskId, callback) {
-            setTimeout(function() {
-                callback('we could not do it all');
-            }, taskId * 100);
-        }
-
-        before('run test', function(done) {
-            mockery.enable({useCleanCache: true, warnOnUnregistered: false});
-
-            concurrentTasks = [
-                callbackSuccessImmediately.bind(null, 1),
-                callbackSuccessImmediately.bind(null, 2),
-                callbackSuccessImmediately.bind(null, 3),
-                callbackErrorImmediately.bind(null, 4),
-                callbackSuccessImmediately.bind(null, 5),
-                callbackSuccessImmediately.bind(null, 6),
-                callbackSuccessImmediately.bind(null, 7)
-            ];
-
-            const Concurrent = require('../../lib/concurrent.js');
-            Concurrent.concurrent(concurrentTasks, callbackSpy = sinon.spy(() => done()));
-        });
-
-        it('should callback with an error if one of the tasks calls back with error', function() {
-            expect(callbackSpy.args).to.eql([
-                ['we could not do it all']
-            ]);
-        });
-
-        it('should invoke the callback only once', function() {
-            expect(callbackSpy.callCount).to.equal(1);
         });
     });
 });
