@@ -1,169 +1,126 @@
 'use strict';
 
-const sinon = require('sinon');
+const mockery = require('mockery');
 const expect = require('chai').expect;
+const sinon = require('sinon');
 
-describe('map-each - unit tests', function() {
+describe('map-each', function() {
+    this.timeout(10000);
 
-    let MapEach;
-    let nextTickStub;
-    const inputArray = [1, 2, 3, 4, 5];
-    let iteratee;
-    let iterateeBindStub;
-    const iterateeBindStubResult = function iterateeBindResult() {};
+    function taskOfRandomDuration(taskId, callback) {
+        setTimeout(function() {
+            if (taskId % 2 === 0) {
+                callback(null, `even tasks should succeed ${taskId}`);
+            } else {
+                callback(`odd tasks should fail ${taskId}`);
+            }
 
-    let mapEachCallbackStub;
-    let mapEachCallbackBindStub;
-    const mapEachCallbackBindResult = function mapEachCallbackBindResult() {};
+        }, Math.floor((Math.random() * 500) + 50));
+    }
 
-    before(function() {
-        MapEach = require('../../lib/map-each.js');
-        nextTickStub = sinon.stub(process, 'nextTick');
+    describe('all tasks succeed', function() {
+        let callbackSpy;
+        let iterateeSpy;
 
-        iteratee = sinon.spy();
-        iterateeBindStub = sinon.stub(iteratee, 'bind').returns(iterateeBindStubResult);
-    });
+        before('run test', function(done) {
+            mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
-    beforeEach(function() {
-        nextTickStub.reset();
-        iterateeBindStub.reset();
-    });
-
-    after(function() {
-        process.nextTick.restore();
-    });
-
-    describe('map-each - entry-point', function() {
-
-        const callback = function callback() {};
-
-        before(function() {
-            mapEachCallbackStub = sinon.stub(MapEach, '_mapEachCallback');
-            mapEachCallbackBindStub = sinon.stub(mapEachCallbackStub, 'bind').returns(mapEachCallbackBindResult);
-        });
-
-        beforeEach(function() {
-            mapEachCallbackStub.reset();
-            MapEach.mapEach(inputArray, iteratee, callback);
+            const MapEach = require('../../lib/map-each.js');
+            MapEach.mapEach([0, 2, 4, 6, 8], iterateeSpy = sinon.spy(taskOfRandomDuration), callbackSpy = sinon.spy(() => done()));
         });
 
         after(function() {
-            MapEach._mapEachCallback.restore();
+            mockery.disable();
         });
 
-        it('should bind the callback, input array, iteratee, index and accumulator to the mapEachCallback', function() {
-            expect(mapEachCallbackBindStub.args[0]).eql([
-                null, callback, inputArray, iteratee, 0, []
+        it('should call back with null and a result array containing an element for task result', function() {
+            expect(callbackSpy.args).to.eql([
+                [null, [
+                    'even tasks should succeed 0',
+                    'even tasks should succeed 2',
+                    'even tasks should succeed 4',
+                    'even tasks should succeed 6',
+                    'even tasks should succeed 8'
+                ]]
             ]);
         });
 
-        it('should bind the first element of the input array, and the bound callback to the iteratee', function() {
-            expect(iterateeBindStub.args[0]).to.eql([
-                null, inputArray[0], mapEachCallbackBindResult
-            ]);
+        it('should call the iteratee once per input item', function() {
+            expect(iterateeSpy.callCount).to.equal(5);
         });
 
-        it('should invoke provide the bound iteratee function to process.nextTick', function() {
-            expect(nextTickStub.args[0]).to.eql([
-                iterateeBindStubResult
-            ]);
+        it('should invoke the iteratee for each input item in order', function() {
+            const calledWithArgs = iterateeSpy.args.map((args) => args[0]);
+
+            expect(calledWithArgs).to.eql([0, 2, 4, 6, 8]);
         });
 
-        it('should invoke process.nextTick once', function() {
-            expect(nextTickStub.callCount).to.equal(1);
+        it('should invoke the iteratee for each input item and a callback function', function() {
+            expect(iterateeSpy.alwaysCalledWith(sinon.match.number, sinon.match.func)).to.equal(true);
         });
     });
 
-    describe('map-each - callback', function() {
-        let allDoneStub;
-        let allDoneBindStub;
-        const allDoneBindResult = function allDoneBound() {};
+    describe('a task fails halfway through execution', function() {
+        let callbackSpy;
+        let iterateeSpy;
 
-        before(function() {
-            allDoneStub = sinon.stub();
-            allDoneBindStub = sinon.stub(allDoneStub, 'bind').returns(allDoneBindResult);
+        before('run test', function(done) {
+            mockery.enable({useCleanCache: true, warnOnUnregistered: false});
+
+            const MapEach = require('../../lib/map-each.js');
+            MapEach.mapEach([0, 2, 3, 4, 6], iterateeSpy = sinon.spy(taskOfRandomDuration), callbackSpy = sinon.spy(() => done()));
         });
 
-        beforeEach(function() {
-            allDoneBindStub.reset();
+        after(function() {
+            mockery.disable();
         });
 
-        describe('when invoked with an error', function() {
-
-            const expectedError = new Error('not making any promises');
-
-            beforeEach(function() {
-                MapEach._mapEachCallback(allDoneStub, inputArray, iteratee, 0, [], expectedError);
-            });
-
-            it('should bind the error to the allDone callback', function() {
-                expect(allDoneBindStub.args[0]).to.eql([
-                    null, expectedError
-                ]);
-            });
-
-            it('should pass the bound allDone callback to process.nextTick', function() {
-                expect(nextTickStub.args[0]).to.eql([allDoneBindResult]);
-            });
-
-            it('should invoke process.nextTick once', function() {
-                expect(nextTickStub.callCount).to.equal(1);
-            });
+        it('should callback with an error if one of the tasks calls back with error', function() {
+            expect(callbackSpy.args).to.eql([
+                ['odd tasks should fail 3']
+            ]);
         });
 
-        describe('when invoked for last callback of the iteratee', function() {
-            beforeEach(function() {
-                MapEach._mapEachCallback(allDoneStub, inputArray, iteratee, 4, ['yay', 'res', 'u', 'lts'], null, 'here');
-            });
-
-            it('should bind null and the results array to the allDone callback', function() {
-                expect(allDoneBindStub.args[0]).to.eql([
-                    null, null, ['yay', 'res', 'u', 'lts', 'here']
-                ]);
-            });
-
-            it('should pass the bound allDone callback to process.nextTick', function() {
-                expect(nextTickStub.args[0]).to.eql([allDoneBindResult]);
-            });
-
-            it('should invoke process.nextTick once', function() {
-                expect(nextTickStub.callCount).to.equal(1);
-            });
+        it('should invoke the callback only once', function() {
+            expect(callbackSpy.callCount).to.equal(1);
         });
 
-        describe('when invoked with the n-1th array element', function() {
+        it('should not attempt any additional tasks after the one tha fails', function() {
+            expect(iterateeSpy.callCount).to.equal(3);
+        });
 
-            before(function() {
-                mapEachCallbackBindStub = sinon.stub(MapEach._mapEachCallback, 'bind').returns(mapEachCallbackBindResult);
-            });
-
-            beforeEach(function() {
-                MapEach._mapEachCallback(allDoneStub, inputArray, iteratee, 3, ['yay', 'res', 'u'], null, 'lts');
-            });
-
-            after(function() {
-                MapEach._mapEachCallback.bind.restore();
-            });
-
-            it('should bind allDone callback, inputArray, forEachMethod, index and results to the mapEach callback', function() {
-                expect(mapEachCallbackBindStub.args[0]).to.eql([
-                    null, allDoneStub, inputArray, iteratee, 4, ['yay', 'res', 'u', 'lts']
-                ]);
-            });
-
-            it('should bind the next value of the input array and the bound mapEachCallback to the iteratee', function() {
-                expect(iterateeBindStub.args[0]).to.eql([
-                    null, inputArray[4], mapEachCallbackBindResult
-                ]);
-            });
-
-            it('should invoke process.nextTick with the bound iteratee', function() {
-                expect(nextTickStub.args[0]).to.eql([iterateeBindStubResult]);
-            });
-
-            it('should invoke process.nextTick once', function() {
-                expect(nextTickStub.callCount).to.equal(1);
-            });
+        it('should invoke the iteratee for each input item and a callback function', function() {
+            expect(iterateeSpy.alwaysCalledWith(sinon.match.number, sinon.match.func)).to.equal(true);
         });
     });
+
+    describe('input is an empty array', function() {
+        let callbackSpy;
+        let iterateeSpy;
+
+        before('run test', function(done) {
+            mockery.enable({useCleanCache: true, warnOnUnregistered: false});
+
+            const MapEach = require('../../lib/map-each.js');
+            MapEach.mapEach([], iterateeSpy = sinon.spy(), callbackSpy = sinon.spy(() => done()));
+        });
+
+        after(function() {
+            mockery.disable();
+        });
+
+        it('should not call the iteratee', function() {
+            expect(iterateeSpy.callCount).to.equal(0);
+        });
+
+        it('should call the callback with null error and an empty array for the result', function() {
+            const expectedError = null;
+            const expectedResultsArray = [];
+
+            expect(callbackSpy.args).to.eql([
+                [expectedError, expectedResultsArray]
+            ]);
+        });
+    });
+
 });
