@@ -34,7 +34,7 @@ describe('index - unit tests', function() {
     });
 
     afterEach(function() {
-        mockery.deregisterAll();ß
+        mockery.deregisterAll(); ß;
         mockery.disable();
     });
 
