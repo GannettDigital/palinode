@@ -4,88 +4,94 @@ const mockery = require('mockery');
 const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
-chai.use(require('chai-things'));
 
-describe('map-concurrent-all - unit tests', function() {
-    let MapConcurrentAll;
-    let callbackSpy;
-    let concurrentAllSpy;
+describe('map-concurrent-all', function() {
+    this.timeout(10000);
 
-    before(function() {
-        callbackSpy = sinon.spy();
+    describe('some tasks fail, some tasks succeed', function() {
+        let callbackSpy;
+        let taskSpy;
 
-        mockery.enable({useCleanCache: true});
-        mockery.registerAllowable('../../lib/map-concurrent-all.js');
-        mockery.registerMock('./concurrent-all.js', {concurrentAll: concurrentAllSpy = sinon.spy()});
+        function taskOfRandomDuration(taskId, callback) {
+            setTimeout(function() {
+                if (taskId % 2 === 0) {
+                    callback(null, `even tasks should succeed ${taskId}`);
+                } else {
+                    callback(`odd tasks should fail ${taskId}`);
+                }
 
-        MapConcurrentAll = require('../../lib/map-concurrent-all.js');
-    });
+            }, Math.floor((Math.random() * 500) + 50));
+        }
 
-    beforeEach(function() {
-        callbackSpy.reset();
-        concurrentAllSpy.reset();
-    });
+        before('run test', function(done) {
+            mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
-    after(mockery.disable);
-
-    describe('map-concurrent-all - entry point', function() {
-        const iterateeStub = sinon.stub();
-        const iterateeBindStub = sinon.stub(iterateeStub, 'bind').returns(boundIteratee);
-
-        function boundIteratee() {}
-
-        const inputItems = [1, 2];
+            const MapConcurrentAll = require('../../lib/map-concurrent-all.js');
+            MapConcurrentAll.mapConcurrentAll([0, 1, 2, 3], taskSpy = sinon.spy(taskOfRandomDuration), callbackSpy = sinon.spy(() => done()));
+        });
 
         after(function() {
-            iterateeBindStub.restore();
+            mockery.disable();
         });
 
-        beforeEach(function() {
-            iterateeStub.reset();
-            iterateeBindStub.reset();
-            MapConcurrentAll.mapConcurrentAll(inputItems, iterateeStub, callbackSpy);
-        });
+        it(`should call the callback with an error count and the expected results array, containing an element for 
+        concurrent task with two properties set appropriately containing the error or result of the task`, function() {
+            const expectedErrorCount = 2;
+            const expectedResultsArray = [
+                {
+                    error: null,
+                    result: 'even tasks should succeed 0'
+                },
+                {
+                    error: 'odd tasks should fail 1',
+                    result: null
+                },
+                {
+                    error: null,
+                    result: 'even tasks should succeed 2'
+                },
+                {
+                    error: 'odd tasks should fail 3',
+                    result: null
+                }
+            ];
 
-        it('should bind the input item to each task function', function() {
-            expect(iterateeBindStub.args).to.eql([
-                [null, 1],
-                [null, 2]
+            expect(callbackSpy.args).to.eql([
+                [expectedErrorCount, expectedResultsArray]
             ]);
         });
 
-        it('should invoke concurrent with the bound iteratees and the callback', function() {
-            expect(concurrentAllSpy.args[0]).to.eql([
-                [boundIteratee, boundIteratee], callbackSpy
-            ]);
+        it('should have called all functions despite errors having occurred', function() {
+            expect(taskSpy.callCount).to.equal(4);
         });
     });
 
-    describe('map-concurrent-all - entry point - empty input', function() {
-        const iterateeStub = sinon.stub();
-        const iterateeBindStub = sinon.stub(iterateeStub, 'bind').returns(boundIteratee);
+    describe('input is an empty array', function() {
+        let callbackSpy;
+        let taskSpy;
 
-        function boundIteratee() {}
+        before('run test', function(done) {
+            mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
-        const inputItems = [];
+            const MapConcurrentAll = require('../../lib/map-concurrent-all.js');
+            MapConcurrentAll.mapConcurrentAll([], taskSpy = sinon.spy(), callbackSpy = sinon.spy(() => done()));
+        });
 
         after(function() {
-            iterateeBindStub.restore();
+            mockery.disable();
         });
 
-        beforeEach(function() {
-            iterateeStub.reset();
-            iterateeBindStub.reset();
-            MapConcurrentAll.mapConcurrentAll(inputItems, iterateeStub, callbackSpy);
-        });
+        it('should call the callback with null error and an empty array for the result', function() {
+            const expectedError = null;
+            const expectedResultsArray = [];
 
-        it('should bind the input item to each task function', function() {
-            expect(iterateeBindStub.callCount).to.equal(0);
-        });
-
-        it('should invoke concurrent with the bound iteratees and the callback', function() {
-            expect(concurrentAllSpy.args[0]).to.eql([
-                [], callbackSpy
+            expect(callbackSpy.args).to.eql([
+                [expectedError, expectedResultsArray]
             ]);
+        });
+
+        it('should not call the task', function() {
+            expect(taskSpy.callCount).to.equal(0);
         });
     });
 });
