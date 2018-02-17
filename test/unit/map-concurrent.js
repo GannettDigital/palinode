@@ -95,7 +95,7 @@ describe('map-concurrent', function() {
 
         function asyncTaskToDo(taskId, callback) {
             setTimeout(function() {
-                if (taskId === 2) {
+                if(taskId === 2) {
                     return callback('Error: we could not do it all');
                 }
                 callback(null, taskId);

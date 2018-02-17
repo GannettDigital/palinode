@@ -5,12 +5,12 @@ const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
 
-describe.only('concurrent-all', function() {
+describe('concurrent-all', function() {
     this.timeout(10000);
 
     function taskOfRandomDuration(taskId, callback) {
         setTimeout(function() {
-            if (taskId % 2 === 0) {
+            if(taskId % 2 === 0) {
                 callback(null, `even tasks should succeed ${taskId}`);
             } else {
                 callback(`odd tasks should fail ${taskId}`);

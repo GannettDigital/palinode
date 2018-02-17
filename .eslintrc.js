@@ -71,6 +71,7 @@ module.exports = {
             'error',
             {
                 overrides: {
+                    if: {after: false},
                     else: {before: true},
                     while: {before: true},
                     catch: {before: true}

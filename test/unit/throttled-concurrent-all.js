@@ -10,7 +10,7 @@ describe('throttled-concurrent-all', function() {
 
     function taskOfRandomDuration(taskId, callback) {
         setTimeout(function() {
-            if (taskId % 2 === 0) {
+            if(taskId % 2 === 0) {
                 callback(null, `even tasks should succeed ${taskId}`);
             } else {
                 callback(`odd tasks should fail ${taskId}`);
