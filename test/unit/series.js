@@ -1,7 +1,7 @@
 'use strict';
 
 const mockery = require('mockery');
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const sinon = require('sinon');
 
 describe('series', function() {

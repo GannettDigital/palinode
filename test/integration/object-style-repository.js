@@ -20,6 +20,6 @@ module.exports = objectStyleRepository = {
     },
 
     _set(key, value, callback) {
-        repository.get(key, value, callback);
+        repository.set(key, value, callback);
     }
 };

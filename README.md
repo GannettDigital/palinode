@@ -4,14 +4,14 @@ NodeJS callback-based flow control utility library.  Palinode focuses on a pure,
 [![npm version](https://badge.fury.io/js/palinode.svg)](https://badge.fury.io/js/palinode)
 [![Build Status](https://travis-ci.org/GannettDigital/palinode.svg?branch=master)](https://travis-ci.org/GannettDigital/palinode)  [![Coverage Status](https://coveralls.io/repos/github/GannettDigital/palinode/badge.svg?branch=master)](https://coveralls.io/github/GannettDigital/palinode?branch=master)
 
-palinode (noun): a poem in which the poet retracts a view or sentiment expressed in a former poem. - source: Google. 
+palinode (noun): a poem in which the poet retracts a view or sentiment expressed in a former poem. - source: Google.
 
 ## Installation
 ```Shell
 npm install palinode
 ```
 
-## Test 
+## Test
 ```Shell
 npm run test
 ```
@@ -23,7 +23,7 @@ npm run cover-html
 
 ## Setup
 ```Javascript
-var theFunctionToUse = require(`palinode`).theFunctionYouWant
+const theFunctionToUse = require(`palinode`).theFunctionYouWant
 ```
 
 ## Callback Pattern Expectations
@@ -34,12 +34,12 @@ function(error [, param1, param2, param3...]) {}
 - A callback invoked with a falsy value in the 0th parameter position indicates that caller was successful.
 - A callback invoked with a truthy value in the 0th parameter position indicates the error encountered by the caller.
 - As a best practice, errors provided as the 0th parameter should be an instance of the `Error` prototype.
-- Parameters in the 1st-nth positions contain successful response information, if any. 
+- Parameters in the 1st-nth positions contain successful response information, if any.
 
 ## Supported methods
 
 ### Series
-Runs a series of functions.  Each function calls back to the next. Any parameters passed to a callback are spread into the subsequent function call. 
+Runs a series of functions.  Each function calls back to the next. Any parameters passed to a callback are spread into the subsequent function call.
 The provided array of functions is not mutated.
 
 #### Example usage
@@ -86,8 +86,8 @@ mapEach(inputArray, square, function(error, result) {
 
 ### Concurrent
 - Schedules each function to be executed on the next tick.
-- Invokes a callback when all have been successful, or if any function calls back with error.  
-- If any error occurs, all outstanding callbacks will have no effect. 
+- Invokes a callback when all have been successful, or if any function calls back with error.
+- If any error occurs, all outstanding callbacks will have no effect.
 - If any error occurs, the result will be undefined - partial results are not provided.
 - Results are accumulated into an array, where the position of each result corresponds to the position of the function.
 - The array of task functions is not mutated.
@@ -123,8 +123,8 @@ concurrent(tasks, function(err, res) {
 
 ### MapConcurrent
 - Binds each input item to the provided function.
-- Schedules all bound functions to be executed on next tick. 
-- Calls the callback when all functions have completed, or if any callback with error.  
+- Schedules all bound functions to be executed on next tick.
+- Calls the callback when all functions have completed, or if any callback with error.
 - If any error occurs, all outstanding callbacks will have no effect.
 - If any error occurs, the result will be undefined - partial results are not provided.
 - Results are accumulated into an array, where the position of each result corresponds to the position of the input item.

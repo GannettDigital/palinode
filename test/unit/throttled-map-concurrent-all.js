@@ -2,8 +2,7 @@
 
 const mockery = require('mockery');
 const sinon = require('sinon');
-const chai = require('chai');
-const expect = chai.expect;
+const { expect } = require('chai');
 
 describe('throttled-map-concurrent-all', function() {
     this.timeout(10000);
