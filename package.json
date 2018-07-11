@@ -1,6 +1,6 @@
 {
   "name": "palinode",
-  "version": "0.0.7",
+  "version": "1.0.0",
   "description": "node callback-based flow control utility library",
   "keywords": [
     "flow",
@@ -21,20 +21,24 @@
     "url": "https://github.com/GannettDigital/palinode/issues"
   },
   "homepage": "https://github.com/GannettDigital/palinode#readme",
+  "engines": {
+    "node": ">=8.1.2"
+  },
   "devDependencies": {
-    "chai": "3.5.0",
-    "chai-things": "0.2.0",
-    "coveralls": "2.11.11",
-    "istanbul": "0.4.4",
-    "jscs": "3.0.7",
-    "mocha": "2.5.3 ",
-    "mockery": "1.7.0",
-    "sinon": "1.17.4"
+    "chai": "4.1.2",
+    "coveralls": "3.0.0",
+    "eslint": "4.18.2",
+    "istanbul": "0.4.5",
+    "mocha": "5.0.4",
+    "mockery": "2.1.0",
+    "sinon": "4.4.3"
   },
   "scripts": {
-    "test": "mocha --recursive test/unit",
-    "lint": "./node_modules/.bin/jscs ./lib/ ./test",
-    "fix-lint": "npm run lint -- -x",
+    "test": "npm run test-unit && npm run test-integration",
+    "test-unit": "mocha --recursive test/unit",
+    "test-integration": "mocha --recursive test/integration",
+    "lint": "./node_modules/.bin/eslint ./lib/ ./test ./index.js",
+    "lint-fix": "npm run lint -- --fix",
     "cover": "node ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --include-all-sources --report lcovonly -- -R spec test/unit --recursive",
     "coveralls": "npm run cover && ./node_modules/coveralls/bin/coveralls.js < coverage/lcov.info"
   }

@@ -1,206 +1,146 @@
 'use strict';
 
-var sinon = require('sinon');
-var expect = require('chai').expect;
+const mockery = require('mockery');
+const { expect } = require('chai');
+const sinon = require('sinon');
 
 describe('series', function() {
 
-    var Series;
-    var function0;
-    var function1;
-    var inputFunctions;
-    var nextTickStub;
+    describe('task in the middle fails, each passing a parameter to the next', function() {
+        function task0(callback) {
+            setTimeout(() => callback(null, 10), 250);
+        }
 
-    before(function() {
-        Series = require('../../lib/series.js');
-        nextTickStub = sinon.stub(process, 'nextTick');
-    });
+        function task1(resultOfTask0, callback) {
+            setTimeout(() => callback(`pretend error object ${resultOfTask0}`), 250);
+        }
 
-    beforeEach(function() {
-        nextTickStub.reset();
-    });
+        function task2(resultOfTask1, callback) {
+            setTimeout(() => callback(null, resultOfTask1 / 2), 250);
+        }
 
-    after(function() {
-        process.nextTick.restore();
-    });
+        let callbackSpy;
+        let tasks;
+        before('run test', function(done) {
+            mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
-    describe('series - entry point', function() {
-        var seriesCallbackStub;
-        var seriesCallbackBindStub;
-        var seriesCallbackBindResult = function seriesCallbackBindResult() {};
-        var function0BindResult = function function0BindResult() {};
-        var function0BindStub;
-        var function1BindStub;
+            const Series = require('../../lib/series.js');
 
-        before(function() {
-            seriesCallbackStub = sinon.stub(Series, '_seriesCallback');
-        });
-
-        beforeEach(function() {
-            seriesCallbackStub.reset();
-            seriesCallbackStub.bind = seriesCallbackBindStub = sinon.stub();
-            seriesCallbackBindStub.returns(seriesCallbackBindResult);
-            inputFunctions = [function0 = sinon.spy(), function1 = sinon.spy()];
-            function0.bind = function0BindStub = sinon.stub();
-            function0BindStub.returns(function0BindResult);
-
-            function1.bind = function1BindStub = sinon.stub();
+            tasks = [
+                sinon.spy(task0),
+                sinon.spy(task1),
+                sinon.spy(task2)
+            ];
+            Series.series(tasks, callbackSpy = sinon.spy(() => done()));
         });
 
         after(function() {
-            Series._seriesCallback.restore();
+            mockery.disable();
         });
 
-        it('should not invoke the second function passed to the series', function() {
-            Series.series(inputFunctions, sinon.spy());
-            expect(function1.callCount).to.equal(0);
+        it('should call the first two tasks once, and the third 0 times', function() {
+            const callCounts = tasks.map((task) => task.callCount);
+            expect(callCounts).to.eql([1, 1, 0]);
         });
 
-        it('should not bind anything to the second function passed to the series', function() {
-            Series.series(inputFunctions, sinon.spy());
-            expect(function1BindStub.callCount).to.equal(0);
+        it('should call task0 once, with no parameters', function() {
+            expect(tasks[0].calledWithExactly(sinon.match.func)).to.equal(true);
         });
 
-        it('should bind the provided callback, function array and 1 to Series._seriesCallback', function() {
-            var callbackSpy = sinon.spy();
-            Series.series(inputFunctions, callbackSpy);
-            expect(seriesCallbackBindStub.args[0]).to.eql([
-                null, callbackSpy, inputFunctions, 1
+        it('should call task1 with the result of task0', function() {
+            expect(tasks[1].calledWithExactly(10, sinon.match.func)).to.equal(true);
+        });
+
+        it('should call task2 with the result of task1', function() {
+            expect(tasks[2].notCalled).to.equal(true);
+        });
+
+        it('should call task0 before task1', function() {
+            expect(tasks[0].calledBefore(tasks[1])).to.equal(true);
+        });
+
+        it('should call task1 before task2', function() {
+            expect(tasks[1].calledBefore(tasks[2])).to.equal(true);
+        });
+
+        it('should call task1 before the callback', function() {
+            expect(tasks[1].calledBefore(callbackSpy)).to.equal(true);
+        });
+
+        it('should call the callback with error from the second task', function() {
+            expect(callbackSpy.args).to.eql([
+                ['pretend error object 10']
             ]);
-        });
-
-        it('should bind the bound seriesCallback to the first function', function() {
-            Series.series(inputFunctions, sinon.spy());
-            expect(function0BindStub.args[0]).to.eql([
-                null, seriesCallbackBindResult
-            ]);
-        });
-
-        it('should invoke process.nextTick with the bound function0', function() {
-            Series.series(inputFunctions, sinon.spy());
-            expect(nextTickStub.args[0]).to.eql([function0BindResult]);
-        });
-
-        it('should invoke process.nextTick once', function() {
-            Series.series(inputFunctions, sinon.spy());
-            expect(nextTickStub.callCount).to.equal(1);
         });
     });
 
-    describe('series - callback wrapper', function() {
-        var allDoneSpy;
-        var allDoneBindStub;
-        var allDoneBindResult = {result: 'of allDone.bind'};
+    describe('all tasks succeed, each passing a parameter to the next', function() {
+        function task0(callback) {
+            setTimeout(() => callback(null, 10), 250);
+        }
 
-        var seriesCallbackBindStub;
-        var applyBindStub;
+        function task1(resultOfTask0, callback) {
+            setTimeout(() => callback(null, resultOfTask0 * 14), 250);
+        }
 
-        before(function() {
-            seriesCallbackBindStub = sinon.stub(Series._seriesCallback, 'bind');
-            applyBindStub = sinon.stub(Function.prototype.apply, 'bind');
-        });
+        function task2(resultOfTask1, callback) {
+            setTimeout(() => callback(null, resultOfTask1 / 2), 250);
+        }
 
-        beforeEach(function() {
-            allDoneSpy = sinon.spy();
-            allDoneSpy.bind = allDoneBindStub = sinon.stub().returns(allDoneBindResult);
+        let callbackSpy;
+        let tasks;
+        before('run test', function(done) {
+            mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
-            inputFunctions = [function0 = sinon.spy(), function1 = sinon.spy()];
-            seriesCallbackBindStub.reset();
-            applyBindStub.reset();
+            const Series = require('../../lib/series.js');
+
+            tasks = [
+                sinon.spy(task0),
+                sinon.spy(task1),
+                sinon.spy(task2)
+            ];
+            Series.series(tasks, callbackSpy = sinon.spy(() => done()));
         });
 
         after(function() {
-            Series._seriesCallback.bind.restore();
-            Function.prototype.apply.bind.restore();
+            mockery.disable();
         });
 
-        describe('invoked with error', function() {
-            var expectedError;
-            beforeEach(function() {
-                expectedError = new Error('whatever');
-                Series._seriesCallback(allDoneSpy, inputFunctions, 1, expectedError);
-            });
-
-            it('should bind null and the error to the allDone callback if an error is passed', function() {
-                expect(allDoneBindStub.args[0]).to.eql([null, expectedError]);
-            });
-
-            it('should invoke process.nextTick with the bound allDone if an error is passed', function() {
-                expect(nextTickStub.args[0]).to.eql([allDoneBindResult]);
-            });
-
-            it('should invoke process.nextTick once if an error is passed', function() {
-                expect(nextTickStub.callCount).to.equal(1);
-            });
+        it('should should call each task once', function() {
+            const callCounts = tasks.map((task) => task.callCount);
+            expect(callCounts).to.eql([1, 1, 1]);
         });
 
-        describe('final invocation, no errors', function() {
-            var arg1, arg2, arg3;
-            var applyBindStubResult = {there: 'was a fire fight!!!'};
-
-            beforeEach(function() {
-                arg1 = {iAm: 'an object'};
-                arg2 = 'stringy string';
-                arg3 = 999999999;
-                applyBindStub.returns(applyBindStubResult);
-                Series._seriesCallback(allDoneSpy, inputFunctions, 2, null, arg1, arg2, arg3);
-            });
-
-            it('should bind the results such that null is in the first position to indicate no error', function() {
-                var bindStubArgs = applyBindStub.args[0];
-                var bindStubResultsArgs = bindStubArgs[2];
-                expect(bindStubResultsArgs[0]).to.eql(null);
-            });
-
-            it('should bind the null, and results to the allDone.apply method', function() {
-                 expect(applyBindStub.args[0]).to.eql([
-                     allDoneSpy, null, [null, arg1, arg2, arg3]
-                 ]);
-            });
-
-            it('should invoke process.nextTick with the result of the apply.bind', function() {
-                expect(nextTickStub.args[0]).to.eql([applyBindStubResult]);
-            });
-
-            it('should invoke process.nextTick once', function() {
-                expect(nextTickStub.callCount).to.equal(1);
-            });
+        it('should call task0 once, with no parameters', function() {
+            expect(tasks[0].calledWithExactly(sinon.match.func)).to.equal(true);
         });
 
-        describe('continuing invocations', function() {
-            var arg1, arg2, arg3;
-            var seriesCallbackBindResult;
-            var fakeNext;
+        it('should call task1 with the result of task0', function() {
+            expect(tasks[1].calledWithExactly(10, sinon.match.func)).to.equal(true);
+        });
 
-            beforeEach(function() {
-                arg1 = {iAm: 'an object'};
-                arg2 = 'stringy string';
-                arg3 = 999999999;
+        it('should call task2 with the result of task1', function() {
+            expect(tasks[2].calledWithExactly(140, sinon.match.func)).to.equal(true);
+        });
 
-                seriesCallbackBindResult = function recursive_seriesCallback() {};
-                seriesCallbackBindStub.returns(seriesCallbackBindResult);
+        it('should call task0 before task1', function() {
+            expect(tasks[0].calledBefore(tasks[1])).to.equal(true);
+        });
 
-                fakeNext = function next() {
-                };
-                seriesCallbackBindStub.returns(seriesCallbackBindResult);
-                applyBindStub.returns(fakeNext);
+        it('should call task1 before task2', function() {
+            expect(tasks[1].calledBefore(tasks[2])).to.equal(true);
+        });
 
-                Series._seriesCallback(allDoneSpy, inputFunctions, 1, null, arg1, arg2, arg3);
-            });
+        it('should call task2 before the callback', function() {
+            expect(tasks[2].calledBefore(callbackSpy)).to.equal(true);
+        });
 
-            it('should bind null, the provided arguments, and the freshly created _seriesCallback to the next input functions apply method', function() {
-                expect(applyBindStub.args[0]).eql([
-                    function1, null, [arg1, arg2, arg3, seriesCallbackBindResult]
-                ]);
-            });
-
-            it('should call process.nextTick with the function created by binding parameters to the second function', function() {
-                expect(nextTickStub.args[0]).eql([fakeNext]);
-            });
-
-            it('should call process.nextTick once', function() {
-                expect(nextTickStub.callCount).to.equal(1);
-            });
+        it('should call the callback with the null for error and the result of the series', function() {
+            expect(callbackSpy.args).to.eql([
+                [null, 70]
+            ]);
         });
     });
+
 });
+
